@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const bcrypt = require('bcryptjs')
 
 
 const Schema = mongoose.Schema
@@ -16,11 +17,22 @@ const userSchema = Schema({
         },
     },
     password: { type: String, require: [true, 'Please provide password!'], minlength: 8 },
+    role : { type: String, enum : ['admin', 'user'], default: 'user'},
     first_name: { type: String, default: 'First Name' },
     last_name: { type: String, default: 'Last Name' },
     // // created_at:{},
     // created_at:{},
 })
+
+userSchema.pre('save', async function(){
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt) //hashing
+})
+
+userSchema.methods.comparePassword = async function(tempPassword){
+    const matchPassword = await bcrypt.compare(tempPassword, this.password)
+    return matchPassword
+}
 
 const User = mongoose.model('User', userSchema)
 module.exports = User;

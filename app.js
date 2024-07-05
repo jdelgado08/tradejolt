@@ -35,7 +35,7 @@ app.get('/api', (req, res) => {
 })
 
 app.use('/api/auth',authRouter) 
-app.use('/api/user',userRouter) 
+app.use('/api/users',userRouter) 
 
 app.use(notFoundMiddleware)//once we "hit" here, we done, no next in this Middleware.
 app.use(errorHandlerMiddleware) //only hit from a "sucessfull" route.

@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const { StatusCodes} = require('http-status-codes')
 const CustomError = require('../errors')
-const {cookieToRes} = require('../utils')
+const {cookieToRes, createUserToken} = require('../utils')
 
 
 const registerUser = async (req, res) => {
@@ -13,14 +13,14 @@ const registerUser = async (req, res) => {
     }
     //create user
     const user = await User.create({email,username, password})
-    tokenUser = {userName : user.username, userID : user._id } //payload
+    const tokenUser = createUserToken (user) //payload
     // const token = creatJWT({payload:tokenUser})
     cookieToRes({res, user : tokenUser}) //cookie to response
     //console.log(user);
     res.status(StatusCodes.CREATED).json({ user:tokenUser })//recap, do proper jwt string
 }
 const loginUser = async (req, res) => {
-    const {email, username, password} = req.body
+    const {email, username, password, firstName, lastName} = req.body
     // res.send('Login User')
     if (!email || ! password) {
         throw new CustomError.BadRequestError('Please provide E-mail and Password')
@@ -33,9 +33,9 @@ const loginUser = async (req, res) => {
     if (!passwordCorrect) {
         throw new CustomError.UnauthenticatedError('Invalid Credentials')
     }
-    tokenUser = {userName : user.username, userID : user._id } 
+    const tokenUser = createUserToken (user)
     cookieToRes({res, user : tokenUser}) 
-    res.status(StatusCodes.CREATED).json({ user:tokenUser })//recap, do proper jwt string
+    res.status(StatusCodes.OK).json({ user:tokenUser })//recap, do proper jwt string
 }
 const logoutUser = async (req, res) => { //only remove the cookie
     res.cookie('token', 'logout',{

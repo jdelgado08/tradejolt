@@ -32,7 +32,7 @@ const userSchema = Schema({
      },
     role : { 
         type: String,
-        enum : ['admin', 'user'],
+        enum : ['admin', 'manager', 'user'],
         default: 'user'
     },
     firstName: {
@@ -43,9 +43,14 @@ const userSchema = Schema({
         type: String,
         default: 'Last Name'
     },
-    // // created_at:{},
-    // created_at:{},
-})
+    //implement soon!!
+    // managerId:{
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'User',
+    //     default: null
+    // },
+    
+}, {timestamps:true})
 
 userSchema.pre('save', async function(){
     // console.log(this.isModified('password'));

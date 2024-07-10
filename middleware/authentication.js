@@ -25,11 +25,27 @@ const authenticateUser = async (req, res, next) => {
     next();
 }
 
+//test
 
+const adminAuth = async (req, res, next)=>{
+    if (req.user.role !== 'admin'){
+        console.log('Ping test admin');
+        throw new CustomError.UnauthorizedError('Not authorized to acess!') 
+    }
+    next();
+}
 
-
+const managerAuth = async (req, res, next)=>{
+    if (req.user.role !== 'manager'){
+        console.log('Ping test manager');
+        throw new CustomError.UnauthorizedError('Not authorized to acess!') 
+    }
+    next();
+}
 
 module.exports = {
     authenticateUser,
+    adminAuth,
+    managerAuth,
 
 }

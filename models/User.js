@@ -43,12 +43,12 @@ const userSchema = Schema({
         type: String,
         default: 'Last Name'
     },
-    //implement soon!!
-    // managerId:{
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'User',
-    //     default: null
-    // },
+    // implement soon!!
+    managerId:{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
     
 }, {timestamps:true})
 

@@ -44,9 +44,28 @@ const logoutUser = async (req, res) => { //only remove the cookie
     })
     res.status(StatusCodes.OK).json({msg: 'user logOut'}) //dev propose only!!
 }
-
+const registerUserManager = async (req, res) => {
+     const {email, username, password} = req.body
+     const duplicatedEmail = await User.findOne({email})
+     if(duplicatedEmail) {
+         throw new CustomError.BadRequestError('Email already in use')
+     }
+     console.log(req.user);
+     //test
+    //  throw new CustomError.BadRequestError('Teste Only')
+     //create user
+     const role = 'manager'
+     const user = await User.create({email,username, password, role})
+     const tokenUser = createUserToken (user) //payload
+     // const token = creatJWT({payload:tokenUser})
+     cookieToRes({res, user : tokenUser}) //cookie to response
+     //console.log(user);
+     res.status(StatusCodes.CREATED).json({ user:tokenUser })//recap, do proper jwt string
+ }
 module.exports = {
     registerUser,
     loginUser,
     logoutUser,
+    registerUserManager,
+
 }

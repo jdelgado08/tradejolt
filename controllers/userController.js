@@ -72,7 +72,7 @@ const updateUser = async (req, res) => {
     if (!email || !username || !firstName || !lastName) {
         throw new CustomError.BadRequestError('Please provide all the Values')
     }
-    const user = await User.findOne({ _id: req.user.userID })
+    const user = await User.findOne({ _id: req.user.userId })
     // console.log(user);
 
     user.username = username
@@ -81,7 +81,7 @@ const updateUser = async (req, res) => {
     user.lastName = lastName
     user.managerId = managerId
     if (user.role === 'manager') {
-        user.managerId = req.user.userID
+        user.managerId = req.user.userId
     }
 
     await user.save()
@@ -97,8 +97,8 @@ const updateUserPassword = async (req, res) => {
     if (!oldPassword || !newPassword) {
         throw new CustomError.BadRequestError('plesase provide old and new password')
     }
-    const user = await User.findOne({ _id: req.user.userID })
-    console.log(req.user.userID);
+    const user = await User.findOne({ _id: req.user.userId })
+    console.log(req.user.userId);
     const passwordCorrect = await user.comparePassword(oldPassword)
     if (!passwordCorrect) {
         throw new CustomError.UnauthenticatedError('please provide all the values')

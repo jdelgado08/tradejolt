@@ -54,7 +54,7 @@ const registerUserManager = async (req, res) => {
     // throw new CustomError.BadRequestError('Teste Only')
     //create user
     const role = 'manager'
-    const managerId = req.user.userID
+    // const managerId = req.user.userID
     const user = await User.create({ 
         email, 
         username, 

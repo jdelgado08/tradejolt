@@ -5,7 +5,7 @@ const checkPermissions = (requestUser, resourceUserID) => {
 
     // console.log(typeof resourceUserID);
     if (requestUser.role === 'admin') return
-    if(requestUser.userID === resourceUserID.toString()) return
+    if(requestUser.userId === resourceUserId.toString()) return
     throw new CustomError.UnauthorizedError('Not authorized to acess!')
 }
 

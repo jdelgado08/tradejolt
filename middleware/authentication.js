@@ -13,7 +13,7 @@ const authenticateUser = async (req, res, next) => {
         req.user = {
             username : payload.username,
             role : payload.role,
-            userID : payload.userID,
+            userId : payload.userId,
             firstName : payload. firstName,
             lastName : payload. lastName,
 

@@ -15,21 +15,30 @@ const createAccount = async (req, res) => {
     if (duplicatedAccountName) {
         throw new CustomError.BadRequestError('Account Name already in use, pls provide a diferent name')
     }
-
+    
+    // console.log(req.user);
+    
     const account = await Account.create({
-        userId: req.user.userID,
+        userId: req.user.userId,
         accountName,
         initialBalance,
         currentBalance
     });
 
-    res.status(StatusCodes.OK).json(account)
+    res.status(StatusCodes.CREATED).json({Account : account })
 }
 
 //get all Accounts for the actual user
 const getAllAccountsUser = async (req, res) => {
-    console.log(req.user);
-    res.send('get all user Accounts')
+    const userId = req.user.userId
+    const accounts = await Account.find({ userId })
+    
+    // console.log(accounts);
+    if (accounts.length === 0) {
+        throw new CustomError.NotFoundError('you dont have any accounts')
+    }
+
+    res.status(StatusCodes.OK).json({Accounts : accounts })
 }
 //get single account 
 const getAccount = async (req, res) => {

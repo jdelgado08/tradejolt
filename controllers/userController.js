@@ -6,6 +6,7 @@ const { createUserToken, cookieToRes, checkPermissions } = require('../utils')
 
 
 //admin
+
 const getAllUsers = async (req, res) => {
     //console.log(req.user);
     const users = await User.find({ role: { $in: ['user', 'manager'] } }).select('-password')
@@ -79,6 +80,9 @@ const updateUser = async (req, res) => {
     user.firstName = firstName
     user.lastName = lastName
     user.managerId = managerId
+    if (user.role === 'manager') {
+        user.managerId = req.user.userID
+    }
 
     await user.save()
 
@@ -103,7 +107,6 @@ const updateUserPassword = async (req, res) => {
     await user.save()//invoque de hook .pre
     res.status(StatusCodes.OK).json({ msg: 'Sucess!Password updated!' })
 }
-
 
 const getManager = async (req, res) => {
     const managers = await User.find({ role: 'manager' }).select('firstName lastName _id')

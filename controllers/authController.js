@@ -54,7 +54,13 @@ const registerUserManager = async (req, res) => {
     // throw new CustomError.BadRequestError('Teste Only')
     //create user
     const role = 'manager'
-    const user = await User.create({ email, username, password, role })
+    const managerId = req.user.userID
+    const user = await User.create({ 
+        email, 
+        username, 
+        password, 
+        role,
+    })
     const tokenUser = createUserToken(user) //payload
     // const token = creatJWT({payload:tokenUser})
     cookieToRes({ res, user: tokenUser }) //cookie to response

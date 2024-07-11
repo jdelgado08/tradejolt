@@ -60,6 +60,15 @@ userSchema.pre('save', async function(){
     }    
 })
 
+userSchema.post('save', async function (doc, next) {
+    if (doc.role === 'manager' && !doc.managerId) {
+      doc.managerId = doc._id;
+      await doc.save();
+    }
+    next();
+  });
+
+
 userSchema.methods.comparePassword = async function(tempPassword){
     const matchPassword = await bcrypt.compare(tempPassword, this.password)
     return matchPassword

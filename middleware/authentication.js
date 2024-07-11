@@ -25,7 +25,7 @@ const authenticateUser = async (req, res, next) => {
     next();
 }
 
-//test
+//test maybe need to refractor and change the checkpermnissions at Utils
 
 const adminAuth = async (req, res, next)=>{
     if (req.user.role !== 'admin'){

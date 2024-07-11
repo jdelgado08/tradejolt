@@ -13,9 +13,9 @@ const getAllUsers = async (req, res) => {
 
 }
 const updateUserToManager = async (req, res) => {
-    const { newRole, email } = req.body
+    const { email } = req.body
     //     console.log(req.body); // catch everything
-    if (!newRole || !email) {
+    if (!email) {
         throw new CustomError.BadRequestError('Please provide the all values required')
     }
     const user = await User.findOne({ email: email })
@@ -25,15 +25,28 @@ const updateUserToManager = async (req, res) => {
     }
     // console.log(user._id);
     // throw new CustomError.BadRequestError('Teste Error on updtUserToManager')
-    user.role = newRole
+    user.role = 'manager'
     user.managerId = user._id
-    
+
     await user.save()
 
     const tokenUser = createUserToken(user)
 
     cookieToRes({ res, user: tokenUser })//to updt again the cookie
     res.status(StatusCodes.OK).json({ user: tokenUser })
+}
+const deleteUser = async (req, res) => {
+    const { id } = req.params
+
+    const user = await User.findByIdAndDelete(id)
+
+    if (!user) {
+        throw new CustomError.NotFoundError(`User with ${id} doesn't exist`)
+    }
+    res.status(StatusCodes.OK).json({ user })
+
+    
+
 }
 //manager
 
@@ -109,5 +122,7 @@ module.exports = {
     updateUserPassword,
     updateUserToManager,
     getManager,
+    deleteUser,
+
 
 }

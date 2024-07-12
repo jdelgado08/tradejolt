@@ -97,8 +97,16 @@ const updateAccount = async (req, res) => {
 }
 }
 //admin
+//maybe do another that remove the permisson of a user to have acess to ACC.
 const deleteAccount = async (req, res) => {
-    res.send('delete account /:id')
+    const {id } = req.params
+
+    const account = await Account.findByIdAndDelete(id)
+
+    if (!account) {
+        throw new CustomError.NotFoundError(`Account with ${id} doesn't exist`)
+    }
+    res.status(StatusCodes.OK).json({ account })
 }
 //get all accounts
 const getAllAccounts = async (req, res) => {

@@ -2,7 +2,12 @@ const Account = require('../models/Account')
 const AccountBalance = require ('../models/AccountBalance')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
-const { createUserToken, cookieToRes, checkPermissions } = require('../utils')
+const { 
+    createUserToken, 
+    cookieToRes, 
+    checkPermissions, 
+   checkPermissionsUser,
+ } = require('../utils')
 
 
 //user/manager
@@ -69,6 +74,8 @@ const updateAccount = async (req, res) => {
     if (!account){
         throw new CustomError.NotFoundError(`No account with id: ${id}`) 
     }
+
+    checkPermissionsUser(req.user, account.userId);
     //if account name update with new
     if(accountName){
         account.accountName = accountName
@@ -97,6 +104,7 @@ const updateAccount = async (req, res) => {
 }
 }
 //admin
+//cause doesnt make much sense delete Accounts
 //maybe do another that remove the permisson of a user to have acess to ACC.
 const deleteAccount = async (req, res) => {
     const {id } = req.params
@@ -108,9 +116,13 @@ const deleteAccount = async (req, res) => {
     }
     res.status(StatusCodes.OK).json({ account })
 }
-//get all accounts
+//get all accounts by admin
+
 const getAllAccounts = async (req, res) => {
-    res.send('get all accounts')
+    
+    const accounts = await Account.find()
+
+    res.status(StatusCodes.OK).json({ Accounts : accounts })
 }
 
 module.exports = {

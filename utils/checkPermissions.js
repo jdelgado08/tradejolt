@@ -11,6 +11,13 @@ const checkPermissions = (requestUser, resourceUserId) => {
     throw new CustomError.UnauthorizedError('Not authorized to acess!')
 }
 
+const checkPermissionsUser = (requestUser, resourceUserId) => {
+    
+    if(requestUser.userId === resourceUserId.toString()) return
+    throw new CustomError.UnauthorizedError('Not authorized to acess!')
+}
+
 module.exports = {
-    checkPermissions
+    checkPermissions,
+    checkPermissionsUser,
 }

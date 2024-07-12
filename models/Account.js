@@ -23,6 +23,12 @@ const accountSchema = Schema ({
     },
 },{timestamps : true})
 
+accountSchema.pre('save', function (next) {
+    if (this.currentBalance < 0) {
+        throw new CustomError.BadRequestError("Not enoth balance, can't go below 0")
+    }
+    next();
+  });
 
 const Account = mongoose.model('Account', accountSchema)
 module.exports = Account;

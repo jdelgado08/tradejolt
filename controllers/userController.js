@@ -98,7 +98,7 @@ const updateUserPassword = async (req, res) => {
         throw new CustomError.BadRequestError('plesase provide old and new password')
     }
     const user = await User.findOne({ _id: req.user.userId })
-    console.log(req.user.userId);
+    // console.log(req.user.userId);
     const passwordCorrect = await user.comparePassword(oldPassword)
     if (!passwordCorrect) {
         throw new CustomError.UnauthenticatedError('please provide all the values')

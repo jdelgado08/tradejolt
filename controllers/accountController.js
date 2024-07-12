@@ -1,4 +1,5 @@
 const Account = require('../models/Account')
+const AccountBalance = require ('../models/AccountBalance')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
 const { createUserToken, cookieToRes, checkPermissions } = require('../utils')
@@ -25,7 +26,13 @@ const createAccount = async (req, res) => {
         currentBalance
     });
 
-    res.status(StatusCodes.CREATED).json({Account : account })
+   const accountBalance = await AccountBalance.create({
+        accountId: account._id,
+        date: new Date(),
+        balance: currentBalance
+      });
+
+    res.status(StatusCodes.CREATED).json({Account : account, AccountBalance : accountBalance })
 }
 
 //get all Accounts for the actual user
@@ -42,13 +49,53 @@ const getAllAccountsUser = async (req, res) => {
 }
 //get single account 
 const getAccount = async (req, res) => {
-    res.send('get Account')
+    const accountId = req.params.id
+    const account = await Account.findById(accountId)
+
+    if(!account){
+        throw new CustomError.NotFoundError(`No account with id: ${req.params.id}`)
+    }
+    // console.log(req.user.userId + account.userId);
+    //make sure you can only see acc of the requested user.
+    checkPermissions(req.user, account.userId)
+    res.status(StatusCodes.OK).json({ account })
 }
 
 const updateAccount = async (req, res) => {
-    res.send('update account info')
-}
+    const {id} = req.params
+    const {accountName, newBalance} = req.body
 
+    const account  = await Account.findById(id)
+    if (!account){
+        throw new CustomError.NotFoundError(`No account with id: ${id}`) 
+    }
+    //if account name update with new
+    if(accountName){
+        account.accountName = accountName
+    }
+    
+    // Update currentBalance if newBalance is provided
+    if (newBalance !== undefined) {
+         //add or sub the balance with newBalance
+        const updatedBalance = account.currentBalance + newBalance;
+        if (updatedBalance < 0) {
+            throw new CustomError.BadRequestError("Not enoth balance, can't go below 0")
+        }
+        
+    account.currentBalance = updatedBalance;
+    
+    await AccountBalance.create({
+        accountId: account._id,
+        date: new Date(),
+        balance: updatedBalance
+      });
+
+    await account.save();  
+    
+    res.status(StatusCodes.OK).json(account)
+
+}
+}
 //admin
 const deleteAccount = async (req, res) => {
     res.send('delete account /:id')

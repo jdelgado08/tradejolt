@@ -90,7 +90,7 @@ const updateAccount = async (req, res) => {
             throw new CustomError.BadRequestError("Not enoth balance, can't go below 0")
         }
         
-        account.currentBalance = updatedBalance;
+        account.currentBalance = updatedBalance
     
     // await AccountBalance.create({
     //     accountId: account._id,

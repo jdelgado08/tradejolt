@@ -29,16 +29,16 @@ Trade Schema
 - accountId: ObjectId, ref: 'Account', required
 - symbol: String, required
 - tradeDate: Date, required
-- entryTime: String, required
-- exitTime: String
+- entryTime: String,
+- exitTime: String,
 - entryPrice: Number, required
-- exitPrice: Number
+- exitPrice: Number, required
 - size: Number, required
 - tradeType: String, enum: ['buy', 'short'], required
-- riskAmount: Number, required
 - fees: Number, default: 0
 - notes: String
-- images: [String]
+- image: [String]
+- netProfitLoss: { type: Number, required: true }
 
 
 PriceAlert Schema

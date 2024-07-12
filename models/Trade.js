@@ -18,13 +18,10 @@ const tradeSchema = Schema({
         required : [true, 'Please provide date'],
     },
     entryTime: { 
-        type: String,
-        required : [true, 'Please provide entry time'],
+        type: Date,
     },
      exitTime: { 
         type: Date,
-        required : [true, 'Please provide exit time'],
-     
     },
     entryPrice: { 
         type: Number,
@@ -54,6 +51,10 @@ const tradeSchema = Schema({
     image: {
         type: String,
         default: '/uploads/default.jpeg'
+    },
+    netProfitLoss: { 
+        type: Number, 
+        require : [true, 'Please provide value of net Profit or Loss'] 
     }
 }, { timestamps: true });
 

@@ -8,13 +8,13 @@ const checkPermissions = (requestUser, resourceUserId) => {
     // manager permission, passing the arg. Must check once i wanan do research by trade, and by user with same manager
     // if (requestUser.role === 'manager') return
     if(requestUser.userId === resourceUserId.toString()) return
-    throw new CustomError.UnauthorizedError('Not authorized to acess!')
+    throw new CustomError.UnauthorizedError('Not authorized to access!')
 }
 
 const checkPermissionsUser = (requestUser, resourceUserId) => {
 
     if(requestUser.userId === resourceUserId.toString()) return
-    throw new CustomError.UnauthorizedError('Not authorized to acess!')
+    throw new CustomError.UnauthorizedError('Not authorized to access!')
 }
 
 module.exports = {

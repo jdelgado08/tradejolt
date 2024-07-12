@@ -1,0 +1,77 @@
+User Schema
+
+- username: String, required, unique, trim
+- email: String, required, unique, trim
+- password: String, required
+- role: String, enum: ['Admin', 'Manager', 'User'], default: 'User'
+- firstName : String, default: 'First Name' 
+- lastName : String, default: 'Last Name' 
+- managerId: ObjectId, ref: 'User', default: null
+
+
+Account Schema
+
+- userId: ObjectId, ref: 'User', required
+- accountName: String, required
+- initialBalance: Number, required
+- currentBalance: Number, required
+
+
+AccountBalance Schema
+
+- accountId: ObjectId, ref: 'Account', required
+- date: Date, required
+- balance: Number, required
+
+
+Trade Schema
+
+- accountId: ObjectId, ref: 'Account', required
+- symbol: String, required
+- tradeDate: Date, required
+- entryTime: String, required
+- exitTime: String
+- entryPrice: Number, required
+- exitPrice: Number
+- size: Number, required
+- tradeType: String, enum: ['buy', 'short'], required
+- riskAmount: Number, required
+- fees: Number, default: 0
+- notes: String
+- images: [String]
+
+
+PriceAlert Schema
+
+- userId: ObjectId, ref: 'User', required
+- accountId: ObjectId, ref: 'Account', required
+- symbol: String, required
+- targetPrice: Number, required
+- alertType: String, enum: ['above', 'below'], required
+- triggered: Boolean, default: false
+
+
+Comment Schema
+
+- tradeId: ObjectId, ref: 'Trade', required
+- userId: ObjectId, ref: 'User', required
+- comment: String, required
+- date: Date, default: Date.now
+
+
+Report Schema
+
+- userId: ObjectId, ref: 'User', required
+- accountId: ObjectId, ref: 'Account', required
+- reportType: String, enum: ['daily', 'weekly', 'monthly'], required
+- content: String, required
+- date: Date, default: Date.now
+
+
+Market Schema
+
+- symbol: String, required
+- lastPrice: Number, required
+- timestamp: Date, required
+
+

@@ -7,6 +7,7 @@ const {
     cookieToRes, 
     checkPermissions, 
    checkPermissionsUser,
+   
  } = require('../utils')
 
 
@@ -89,14 +90,14 @@ const updateAccount = async (req, res) => {
             throw new CustomError.BadRequestError("Not enoth balance, can't go below 0")
         }
         
-    account.currentBalance = updatedBalance;
+        account.currentBalance = updatedBalance;
     
-    await AccountBalance.create({
-        accountId: account._id,
-        date: new Date(),
-        balance: updatedBalance
-      });
-
+    // await AccountBalance.create({
+    //     accountId: account._id,
+    //     date: new Date(),
+    //     balance: updatedBalance
+    //   });
+        //making this with hook post atm
     await account.save();  
     
     res.status(StatusCodes.OK).json(account)

@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser')
 const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoutes')
 const accountRouter = require('./routes/accountRoutes')
+const tradeRouter = require('./routes/tradeRoutes')
 
 //DB
 const mongoDB = require('./db/connect')
@@ -38,6 +39,7 @@ app.get('/api', (req, res) => {
 app.use('/api/auth',authRouter) 
 app.use('/api/users',userRouter) 
 app.use('/api/accounts',accountRouter) 
+app.use('/api/trades',tradeRouter) 
 
 
 app.use(notFoundMiddleware)//once we "hit" here, we done, no next in this Middleware.

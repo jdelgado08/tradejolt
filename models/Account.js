@@ -1,6 +1,8 @@
 
 const mongoose = require ('mongoose')
 const Schema = mongoose.Schema
+const AccountBalance = require ('../models/AccountBalance')
+
 
 const accountSchema = Schema ({
     //reff to userId
@@ -28,6 +30,15 @@ accountSchema.pre('save', function (next) {
         throw new CustomError.BadRequestError("Not enoth balance, can't go below 0")
     }
     next();
+  });
+
+  accountSchema.post('save', async function (doc, next) {
+      await AccountBalance.create({
+        accountId: doc._id,
+        date: new Date(),
+        balance: doc.currentBalance
+      });
+      next();
   });
 
 const Account = mongoose.model('Account', accountSchema)

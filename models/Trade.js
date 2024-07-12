@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const traderSchema = Schema({
+const tradeSchema = Schema({
 
     accountId: {
         type: Schema.Types.ObjectId,
@@ -43,11 +43,6 @@ const traderSchema = Schema({
         enum: ['buy', 'short'], 
         required: true 
     },
-    //think on this one
-    // riskAmount: { 
-    //     type: Number, 
-    //     required : [true, 'Please provide entry price'], 
-    // },
     fees: { 
         type: Number, 
         required : [true, 'Please provide value of fees'],

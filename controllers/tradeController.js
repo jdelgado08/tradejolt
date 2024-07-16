@@ -3,8 +3,7 @@ const Account = require('../models/Account')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
 const { 
-    checkPermissions, 
-    checkPermissionsUser,
+    checkPermissions,
 
  } = require('../utils')
 
@@ -34,7 +33,7 @@ const createTrade = async (req, res) =>{
         throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
     }
 
-    checkPermissions(req.user, account.userId)
+   await checkPermissions(req.user, account.userId)
 
     const castEntryTime = new Date(`${tradeDate}T${entryTime}Z`)
     const castExitTime = new Date(`${tradeDate}T${exitTime}Z`)
@@ -66,19 +65,18 @@ const createTrade = async (req, res) =>{
 //get all trade entry from an Account (accountId)
 const getAllTradesAccount = async (req, res) =>{
     
-    const accountId = req.params.accountId
+   const accountId = req.params.accountId
 
-    const account = await Account.findById(accountId)
+        const account = await Account.findById(accountId)
+        if (!account) {
+            throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
+        }
 
-    if (!account) {
-        throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
-    }
+        await checkPermissions(req.user, account.userId)
 
-    checkPermissions(req.user, account.userId)
-
-    const allEntrys = await Trade.find({accountId})
-    
-    res.status(StatusCodes.OK).json({TradingEntrys : allEntrys})
+        const allEntrys = await Trade.find({ accountId })
+        
+        res.status(StatusCodes.OK).json({ TradingEntrys: allEntrys })
 
 }
 const getTrade = async (req, res) =>{
@@ -92,7 +90,7 @@ const getTrade = async (req, res) =>{
 
     const account = await Account.findById(tradeEntry.accountId)
 
-    checkPermissions(req.user, account.userId)
+   await checkPermissions(req.user, account.userId)
 
     
 

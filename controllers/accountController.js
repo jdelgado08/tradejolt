@@ -7,7 +7,6 @@ const {
     createUserToken, 
     cookieToRes, 
     checkPermissions, 
-   checkPermissionsUser,
    
  } = require('../utils')
 
@@ -64,7 +63,7 @@ const getAccount = async (req, res) => {
     }
     // console.log(req.user.userId + account.userId);
     //make sure you can only see acc of the requested user.
-    checkPermissions(req.user, account.userId)
+    await checkPermissions(req.user, account.userId)
     res.status(StatusCodes.OK).json({ account })
 }
 
@@ -77,7 +76,7 @@ const updateAccount = async (req, res) => {
         throw new CustomError.NotFoundError(`No account with id: ${id}`) 
     }
 
-    checkPermissionsUser(req.user, account.userId);
+    await checkPermissions(req.user, account.userId);
     //if account name update with new
     if(accountName){
         account.accountName = accountName

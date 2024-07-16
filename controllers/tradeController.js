@@ -8,6 +8,7 @@ const {
 
  } = require('../utils')
 
+ //create a trade entry
 const createTrade = async (req, res) =>{
     
     const {
@@ -33,14 +34,7 @@ const createTrade = async (req, res) =>{
         throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
     }
 
-    checkPermissionsUser(req.user, account.userId)
-
-    // const entryTimeString = 
-    // const exitTimeString = 
-
-
-    // console.log(`Parsed entry time string: ${entryTimeString}`);
-    // console.log(`Parsed exit time string: ${exitTimeString}`);
+    checkPermissions(req.user, account.userId)
 
     const castEntryTime = new Date(`${tradeDate}T${entryTime}Z`)
     const castExitTime = new Date(`${tradeDate}T${exitTime}Z`)
@@ -58,7 +52,8 @@ const createTrade = async (req, res) =>{
         fees,
         notes,
         image,
-        netProfitLoss
+        netProfitLoss,
+        
     })
 
     const updateBalance = netProfitLoss - fees
@@ -68,11 +63,39 @@ const createTrade = async (req, res) =>{
 
     res.status(StatusCodes.CREATED).json(tradeEntry)
 }
+//get all trade entry from an Account (accountId)
 const getAllTradesAccount = async (req, res) =>{
-    res.send('Get All trader per Account')
+    
+    const accountId = req.params.accountId
+
+    const account = await Account.findById(accountId)
+
+    if (!account) {
+        throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
+    }
+
+    checkPermissions(req.user, account.userId)
+
+    const allEntrys = await Trade.find({accountId})
+    
+    res.status(StatusCodes.OK).json({TradingEntrys : allEntrys})
+
 }
 const getTrade = async (req, res) =>{
-    res.send('Get Trade')
+    const tradeId = req.params.id
+
+    const tradeEntry = await Trade.findById(tradeId)
+
+    if (!tradeEntry) {
+        throw new CustomError.NotFoundError(`Trade entry with id: ${tradeId} wasn't found`)
+    }
+
+    const account = await Account.findById(tradeEntry.accountId)
+
+    checkPermissions(req.user, account.userId)
+
+    
+
 }
 const updateTrade = async (req, res) =>{
     res.send('update Trade')

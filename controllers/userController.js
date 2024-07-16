@@ -50,7 +50,24 @@ const deleteUser = async (req, res) => {
 
 }
 //manager
+const getAllUsersManager = async (req, res) => {
+    
+    const managerId = req.user.userId;
+    
+    const managedUsers = await User.find({ managerId })
 
+    // console.log(managedUsers);
+
+    const userIds = managedUsers.map(user => user._id);
+
+    if (userIds.length === 0) {
+        throw new CustomError.NotFoundError(`No users found for the manager`);
+      }
+
+
+    res.status(StatusCodes.OK).json({ Users : userIds })
+
+}
 
 //user
 const getUser = async (req, res) => {
@@ -126,6 +143,7 @@ module.exports = {
     updateUserToManager,
     getManager,
     deleteUser,
+    getAllUsersManager,
 
 
 }

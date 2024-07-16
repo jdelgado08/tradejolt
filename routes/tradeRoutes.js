@@ -16,7 +16,7 @@ const {
 //routes
 
 router.route('/').post(authenticateUser,createTrade)
-router.route('/allTradersAccount').get(authenticateUser, getAllTradesAccount)
+router.route('/allEntrysAccount/:accountId').get(authenticateUser, getAllTradesAccount)
 
 router.route('/all').get(authenticateUser, authrorizePermissions('admin'), getAllTrades)
 

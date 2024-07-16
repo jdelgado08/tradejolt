@@ -10,7 +10,8 @@ const {
     getAccount,
     updateAccount,
     deleteAccount,
-    getAllAccounts
+    getAllAccounts,
+    getAllAccountsManager,
 
 
 } = require('../controllers/accountController')
@@ -22,6 +23,7 @@ router.route('/').post(authenticateUser, createAccount)
 router.route('/allUserAccounts').get(authenticateUser, getAllAccountsUser)
 //order
 router.route('/all').get(authenticateUser, authrorizePermissions('admin'), getAllAccounts)
+router.route('/manager/accounts').get(authenticateUser, authrorizePermissions('manager'), getAllAccountsManager)
 router.route('/:id')
     .get(authenticateUser, getAccount)
     .patch(authenticateUser, updateAccount)

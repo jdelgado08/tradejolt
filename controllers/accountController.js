@@ -1,4 +1,5 @@
 const Account = require('../models/Account')
+const User = require('../models/User')
 const AccountBalance = require ('../models/AccountBalance')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
@@ -90,7 +91,7 @@ const updateAccount = async (req, res) => {
             throw new CustomError.BadRequestError("Not enoth balance, can't go below 0")
         }
         
-        account.currentBalance = updatedBalance
+    account.currentBalance = updatedBalance
     
     // await AccountBalance.create({
     //     accountId: account._id,
@@ -116,12 +117,39 @@ const deleteAccount = async (req, res) => {
         throw new CustomError.NotFoundError(`Account with ${id} doesn't exist`)
     }
     res.status(StatusCodes.OK).json({ account })
+    //need to think if i delete the trades relates with this accoutn once i delete account.
 }
 //get all accounts by admin
 
 const getAllAccounts = async (req, res) => {
     
     const accounts = await Account.find()
+
+    res.status(StatusCodes.OK).json({ Accounts : accounts })
+}
+//get all accounts where manager match user
+const getAllAccountsManager = async (req, res) => {
+    
+    const managerId = req.user.userId;
+
+    // console.log(managerId);
+    // Find all users managed by this manager
+    const managedUsers = await User.find({ managerId })
+
+    // console.log(managedUsers);
+
+    const userIds = managedUsers.map(user => user._id);
+
+    if (userIds.length === 0) {
+        throw new CustomError.NotFoundError(`No users found for the manager`);
+      }
+
+    // Find all accounts that belong to these users
+    const accounts = await Account.find({ userId: { $in: userIds } });
+
+    if (!accounts || accounts.length === 0) {
+      throw new CustomError.NotFoundError(`No accounts found for the managed users`);
+    }
 
     res.status(StatusCodes.OK).json({ Accounts : accounts })
 }
@@ -132,6 +160,7 @@ module.exports = {
     getAccount,
     updateAccount,
     deleteAccount,
-    getAllAccounts
+    getAllAccounts,
+    getAllAccountsManager
 
 }

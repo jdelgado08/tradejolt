@@ -12,6 +12,7 @@ const {
     updateUserToManager,
     getManager,
     deleteUser,
+    getAllUsersManager,
 
 
 } = require('../controllers/userController')
@@ -20,6 +21,8 @@ const {
 router.route('/').get(authenticateUser, authrorizePermissions('admin') ,getAllUsers)
 router.route('/updateUserToManager').patch(authenticateUser, authrorizePermissions('admin') ,updateUserToManager)
 router.route('/:id').delete(authenticateUser,authrorizePermissions('admin'),deleteUser)
+
+router.route('/manager/users').get(authenticateUser, authrorizePermissions('manager') ,getAllUsersManager)
 
 //user routes
 router.route('/showMe').get(authenticateUser, showUser)

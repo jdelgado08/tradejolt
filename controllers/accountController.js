@@ -108,16 +108,30 @@ const updateAccount = async (req, res) => {
 //cause doesnt make much sense delete Accounts
 //maybe do another that remove the permisson of a user to have acess to ACC.
 const deleteAccount = async (req, res) => {
-    const {id } = req.params
+    const { id } = req.params;
 
-    const account = await Account.findByIdAndDelete(id)
-
+    const account = await Account.findById(id);
     if (!account) {
-        throw new CustomError.NotFoundError(`Account with ${id} doesn't exist`)
+      throw new CustomError.NotFoundError(`Account with id: ${id} doesn't exist`);
     }
-    res.status(StatusCodes.OK).json({ account })
+
+    await account.deleteOne();
+
+    res.status(StatusCodes.OK).json({ message: 'Account and related data deleted successfully' });
+
+    }
+    
+    
+    // const {id } = req.params
+
+    // const account = await Account.findByIdAndDelete(id)
+
+    // if (!account) {
+    //     throw new CustomError.NotFoundError(`Account with ${id} doesn't exist`)
+    // }
+    // res.status(StatusCodes.OK).json({ account })
     //need to think if i delete the trades relates with this accoutn once i delete account.
-}
+
 //get all accounts by admin
 
 const getAllAccounts = async (req, res) => {

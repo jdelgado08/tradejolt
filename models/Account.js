@@ -2,7 +2,8 @@
 const mongoose = require ('mongoose')
 const Schema = mongoose.Schema
 const AccountBalance = require ('../models/AccountBalance')
-
+const Trade = require('./Trade'); 
+const CustomError = require('../errors/')
 
 const accountSchema = Schema ({
     //reff to userId
@@ -33,13 +34,21 @@ accountSchema.pre('save', function (next) {
   });
 
   accountSchema.post('save', async function (doc, next) {
-      await AccountBalance.create({
+    // console.log(doc.currentBalance);  
+    await AccountBalance.create({
         accountId: doc._id,
         date: new Date(),
         balance: doc.currentBalance
       });
+
+      next()
+  })
+
+  accountSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+      await Trade.deleteMany({ accountId: this._id })
+      await AccountBalance.deleteMany({ accountId: this._id })
       next();
   });
-
 const Account = mongoose.model('Account', accountSchema)
-module.exports = Account;
+
+module.exports = Account

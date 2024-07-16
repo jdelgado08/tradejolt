@@ -1,6 +1,10 @@
 const {creatJWT, checkToken, cookieToRes,} = require('./jwt')
 const {createUserToken} = require('./createUserToken')
-const {checkPermissions, checkPermissionsUser} = require('./checkPermissions')
+const {
+    checkPermissions, 
+    checkUserPermissions,
+
+} = require('./checkPermissions')
 
 module.exports = {
     creatJWT, 
@@ -8,7 +12,7 @@ module.exports = {
     cookieToRes,
     createUserToken,
     checkPermissions,
-    checkPermissionsUser,
+    checkUserPermissions,
 
     
 }

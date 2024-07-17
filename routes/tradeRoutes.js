@@ -23,7 +23,6 @@ router.route('/all').get(authenticateUser, authrorizePermissions('admin'), getAl
 router.route('/:id')
     .get(authenticateUser, getTrade)
     .patch(authenticateUser,updateTrade)
-
-router.route('/:id').delete(authenticateUser, authrorizePermissions('admin'), deleteTrade)
+    .delete(authenticateUser, deleteTrade)
 
 module.exports = router

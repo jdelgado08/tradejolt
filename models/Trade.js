@@ -58,5 +58,20 @@ const tradeSchema = Schema({
     }
 }, { timestamps: true });
 
+
+tradeSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+
+      const trade = this
+      const Account = require('./Account'); // Lazy loading to avoid circular dependency
+      const account = await Account.findById(trade.accountId)
+      if (account) {
+        const updateBalance = trade.netProfitLoss - trade.fees
+        account.currentBalance -= updateBalance
+        await account.save()
+      }
+      next()
+  });
+
+
 const Trade = mongoose.model('Trade', tradeSchema);
 module.exports = Trade;

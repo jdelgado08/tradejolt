@@ -146,14 +146,14 @@ const updateTrade = async (req, res) =>{
     
     //save old netProfitloss
     const oldNetProfitLoss = trade.netProfitLoss;
-    trade.netProfitLoss = netProfitLoss !== undefined ? netProfitLoss : trade.netProfitLoss;
-    
+    trade.netProfitLoss = netProfitLoss !== undefined ? netProfitLoss : trade.netProfitLoss
+
     //save old fees
     const oldFees = trade.fees
-    trade.fees = fees !== undefined ? fees : trade.fees;
+    trade.fees = fees !== undefined ? fees : trade.fees
     
     const updateBalance = (trade.netProfitLoss - trade.fees) - (oldNetProfitLoss - oldFees)
-    account.currentBalance += updateBalance;
+    account.currentBalance += updateBalance
 
     await account.save()
     await trade.save()
@@ -161,11 +161,111 @@ const updateTrade = async (req, res) =>{
     res.status(StatusCodes.OK).json(trade);
 }
 const deleteTrade = async (req, res) =>{
-    res.send('Delete Trade')
+    
+        const { id } = req.params
+    
+        const trade = await Trade.findById(id)
+        if (!trade) {
+            throw new CustomError.NotFoundError(`Trade with id: ${id} wasn't found`)
+        }
+
+        const account = await Account.findById(trade.accountId)
+
+        if (!account) {
+            throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
+        }
+
+        await checkPermissions(req.user, account.userId)
+        await trade.deleteOne();
+    
+        res.status(StatusCodes.OK).json({ message: 'Trade deleted successfully'});
 }
 //admin
 const getAllTrades = async (req, res) =>{
-    res.send('get all trades')
+    
+      // Fetch all accounts and populate user details
+    const accounts = await Account.find()
+    .populate({
+      path: 'userId',
+      select: 'username',
+    })
+    .select('accountName userId currentBalance');
+
+  // Fetch all trades
+  const trades = await Trade.find()
+    .populate({
+      path: 'accountId',
+      select: 'accountName userId',
+      populate: {
+        path: 'userId',
+        select: 'username',
+      },
+    })
+    .select('-__v -createdAt -updatedAt'); // Exclude fields that you don't want in the response
+
+  // Initialize result with accounts and their balances
+  const result = {};
+
+  accounts.forEach(account => {
+    const { userId, accountName, currentBalance } = account;
+    const { username } = userId;
+
+    if (!result[username]) {
+      result[username] = {};
+    }
+
+    if (!result[username][accountName]) {
+      result[username][accountName] = {
+        balance: currentBalance,
+        trades: ['No trades taken'],
+      };
+    }
+  });
+
+  // Add trades to the result
+  trades.forEach(trade => {
+    const { userId, accountName, currentBalance } = trade.accountId;
+    const { username } = userId;
+
+    // Initialize if not already initialized
+    if (!result[username]) {
+      result[username] = {};
+    }
+
+    if (!result[username][accountName]) {
+      result[username][accountName] = {
+        balance: currentBalance,
+        trades: [],
+      };
+    } else {
+      // If trades array contains 'No trades taken', remove it
+      if (result[username][accountName].trades.includes('No trades taken')) {
+        result[username][accountName].trades = [];
+      }
+    }
+
+    // Extract only the necessary trade information
+    const tradeInfo = {
+      _id: trade._id,
+      symbol: trade.symbol,
+      tradeDate: trade.tradeDate,
+      entryTime: trade.entryTime,
+      exitTime: trade.exitTime,
+      entryPrice: trade.entryPrice,
+      exitPrice: trade.exitPrice,
+      size: trade.size,
+      tradeType: trade.tradeType,
+      fees: trade.fees,
+      notes: trade.notes,
+      image: trade.image,
+      netProfitLoss: trade.netProfitLoss,
+    };
+
+    result[username][accountName].trades.push(tradeInfo);
+  });
+
+  res.status(StatusCodes.OK).json(result);
+      
 }
 const getAllTradeEntryManager = async (req, res) =>{
     res.send('get all trades')

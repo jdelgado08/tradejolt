@@ -55,6 +55,10 @@ const tradeSchema = Schema({
     netProfitLoss: { 
         type: Number, 
         require : [true, 'Please provide value of net Profit or Loss'] 
+    },
+    platform: {
+        type : String,
+        default : 'Manual Entry'
     }
 }, { timestamps: true });
 

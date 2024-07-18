@@ -6,6 +6,9 @@ const mongoUri = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@
 
 const mongoDB = async () => {
   try {
+
+    mongoose.set('strictQuery', true); 
+
     await mongoose.connect(mongoUri, {
       writeConcern: {
         w: 'majority',

@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { authenticateUser } = require('../middleware/authentication')
 const { authrorizePermissions } = require('../middleware/permissions')
+const {fileUploadMiddleware} = require('../middleware/fileUpload');
 
 const {
     createTrade,
@@ -10,6 +11,7 @@ const {
     updateTrade,
     deleteTrade,
     getAllTrades,
+    uploadTradesExcell,
     
 } = require('../controllers/tradeController')
 
@@ -17,6 +19,8 @@ const {
 
 router.route('/').post(authenticateUser,createTrade)
 router.route('/allEntrysAccount/:accountId').get(authenticateUser, getAllTradesAccount)
+
+router.route('/upload/Excel/:accountId').post(authenticateUser,fileUploadMiddleware, uploadTradesExcell)
 
 router.route('/all').get(authenticateUser, authrorizePermissions('admin'), getAllTrades)
 

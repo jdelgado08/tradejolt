@@ -37,7 +37,7 @@ const tradeSchema = Schema({
     },
     tradeType: { 
         type: String,
-        enum: ['buy', 'short'], 
+        enum: ['Short', 'Long'], 
         required: true 
     },
     fees: { 

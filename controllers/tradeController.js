@@ -1,190 +1,191 @@
 const Trade = require('../models/Trade')
 const Account = require('../models/Account')
+const ExcelJS = require('exceljs');
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
-const { 
-    checkPermissions,
-    checkUserPermissions,
+const {
+  checkPermissions,
+  checkUserPermissions,
 
- } = require('../utils')
+} = require('../utils')
 
- //create a trade entry (only the userId associated with this Account can use this route)
-const createTrade = async (req, res) =>{
-    
-    const {
-        accountId,
-        symbol,
-        tradeDate,
-        entryTime,
-        exitTime,
-        entryPrice,
-        exitPrice,
-        size,
-        tradeType,
-        fees,
-        notes,
-        image,
-        netProfitLoss,
+//create a trade entry (only the userId associated with this Account can use this route)
+const createTrade = async (req, res) => {
 
-    } = req.body 
+  const {
+    accountId,
+    symbol,
+    tradeDate,
+    entryTime,
+    exitTime,
+    entryPrice,
+    exitPrice,
+    size,
+    tradeType,
+    fees,
+    notes,
+    image,
+    netProfitLoss,
 
-    const account = await Account.findById(accountId)
+  } = req.body
 
-    if (!account) {
-        throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
-    }
+  const account = await Account.findById(accountId)
 
-    checkUserPermissions(req.user, account.userId)
+  if (!account) {
+    throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
+  }
 
-    const castEntryTime = new Date(`${tradeDate}T${entryTime}Z`)
-    const castExitTime = new Date(`${tradeDate}T${exitTime}Z`)
+  checkUserPermissions(req.user, account.userId)
 
-    const tradeEntry = await Trade.create({
-        accountId,
-        symbol,
-        tradeDate: new Date(tradeDate),
-        entryTime : castEntryTime,
-        exitTime : castExitTime,
-        entryPrice,
-        exitPrice,
-        size,
-        tradeType,
-        fees,
-        notes,
-        image,
-        netProfitLoss,
-        
-    })
+  const castEntryTime = new Date(`${tradeDate}T${entryTime}Z`)
+  const castExitTime = new Date(`${tradeDate}T${exitTime}Z`)
 
-    const updateBalance = netProfitLoss - fees
-    account.currentBalance += updateBalance
+  const tradeEntry = await Trade.create({
+    accountId,
+    symbol,
+    tradeDate: new Date(tradeDate),
+    entryTime: castEntryTime,
+    exitTime: castExitTime,
+    entryPrice,
+    exitPrice,
+    size,
+    tradeType,
+    fees,
+    notes,
+    image,
+    netProfitLoss,
 
-    await account.save()
+  })
 
-    res.status(StatusCodes.CREATED).json(tradeEntry)
+  const updateBalance = netProfitLoss - fees
+  account.currentBalance += updateBalance
+
+  await account.save()
+
+  res.status(StatusCodes.CREATED).json(tradeEntry)
 }
 //get all trade entry from an Account (accountId)
-const getAllTradesAccount = async (req, res) =>{
-    
-   const accountId = req.params.accountId //Account Id to get all entrys
+const getAllTradesAccount = async (req, res) => {
 
-        const account = await Account.findById(accountId)
-        if (!account) {
-            throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
-        }
+  const accountId = req.params.accountId //Account Id to get all entrys
 
-        await checkPermissions(req.user, account.userId)
+  const account = await Account.findById(accountId)
+  if (!account) {
+    throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
+  }
 
-        const allEntrys = await Trade.find({ accountId })
+  await checkPermissions(req.user, account.userId)
 
-        res.status(StatusCodes.OK).json({ TradingEntrys: allEntrys })
+  const allEntrys = await Trade.find({ accountId })
 
-}
-const getTrade = async (req, res) =>{
-    const tradeId = req.params.id
-
-    const tradeEntry = await Trade.findById(tradeId)
-
-    if (!tradeEntry) {
-        throw new CustomError.NotFoundError(`Trade entry with id: ${tradeId} wasn't found`)
-    }
-
-    const account = await Account.findById(tradeEntry.accountId)
-
-   await checkPermissions(req.user, account.userId)
-
-   res.status(StatusCodes.OK).json({ TradingEntry: tradeEntry })
+  res.status(StatusCodes.OK).json({ TradingEntrys: allEntrys })
 
 }
-const updateTrade = async (req, res) =>{
+const getTrade = async (req, res) => {
+  const tradeId = req.params.id
 
-    const { id } = req.params // Trade entry ID to be updated
+  const tradeEntry = await Trade.findById(tradeId)
 
-    const {
-      symbol,
-      tradeDate,
-      entryTime,
-      exitTime,
-      entryPrice,
-      exitPrice,
-      size,
-      tradeType,
-      fees,
-      notes,
-      image,
-      netProfitLoss,
-    } = req.body
+  if (!tradeEntry) {
+    throw new CustomError.NotFoundError(`Trade entry with id: ${tradeId} wasn't found`)
+  }
 
+  const account = await Account.findById(tradeEntry.accountId)
 
-    // console.log(req.body);
-    // Find the trade by ID
-    const trade = await Trade.findById(id);
-    if (!trade) {
-      throw new CustomError.NotFoundError(`Trade with id: ${id} wasn't found`);
-    }
+  await checkPermissions(req.user, account.userId)
 
-    // Find the account associated with the trade
-    const account = await Account.findById(trade.accountId);
-    if (!account) {
-      throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
-    }
+  res.status(StatusCodes.OK).json({ TradingEntry: tradeEntry })
 
-    // Check if the requesting user is the owner of the account
-    checkUserPermissions(req.user, account.userId);
-
-    //account ID stays the same, a trade only has meaning associated with the account, if somehow acounttrade was choosen incorrect at creation user should delete the entry.
-    trade.symbol = symbol !== undefined ? symbol : trade.symbol;
-    trade.tradeDate = tradeDate !== undefined ? new Date(tradeDate) : trade.tradeDate;
-    trade.entryTime = entryTime !== undefined ? new Date(`${tradeDate}T${entryTime}Z`) : trade.entryTime;
-    trade.exitTime = exitTime !== undefined ? new Date(`${tradeDate}T${exitTime}Z`) : trade.exitTime;
-    trade.entryPrice = entryPrice !== undefined ? entryPrice : trade.entryPrice;
-    trade.exitPrice = exitPrice !== undefined ? exitPrice : trade.exitPrice;
-    trade.size = size !== undefined ? size : trade.size;
-    trade.tradeType = tradeType !== undefined ? tradeType : trade.tradeType;
-    trade.notes = notes !== undefined ? notes : trade.notes;
-    trade.image = image !== undefined ? image : trade.image;
-    
-    //save old netProfitloss
-    const oldNetProfitLoss = trade.netProfitLoss;
-    trade.netProfitLoss = netProfitLoss !== undefined ? netProfitLoss : trade.netProfitLoss
-
-    //save old fees
-    const oldFees = trade.fees
-    trade.fees = fees !== undefined ? fees : trade.fees
-    
-    const updateBalance = (trade.netProfitLoss - trade.fees) - (oldNetProfitLoss - oldFees)
-    account.currentBalance += updateBalance
-
-    await account.save()
-    await trade.save()
-
-    res.status(StatusCodes.OK).json(trade);
 }
-const deleteTrade = async (req, res) =>{
-    
-        const { id } = req.params
-    
-        const trade = await Trade.findById(id)
-        if (!trade) {
-            throw new CustomError.NotFoundError(`Trade with id: ${id} wasn't found`)
-        }
+const updateTrade = async (req, res) => {
 
-        const account = await Account.findById(trade.accountId)
+  const { id } = req.params // Trade entry ID to be updated
 
-        if (!account) {
-            throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
-        }
+  const {
+    symbol,
+    tradeDate,
+    entryTime,
+    exitTime,
+    entryPrice,
+    exitPrice,
+    size,
+    tradeType,
+    fees,
+    notes,
+    image,
+    netProfitLoss,
+  } = req.body
 
-        await checkPermissions(req.user, account.userId)
-        await trade.deleteOne();
-    
-        res.status(StatusCodes.OK).json({ message: 'Trade deleted successfully'});
+
+  // console.log(req.body);
+  // Find the trade by ID
+  const trade = await Trade.findById(id);
+  if (!trade) {
+    throw new CustomError.NotFoundError(`Trade with id: ${id} wasn't found`);
+  }
+
+  // Find the account associated with the trade
+  const account = await Account.findById(trade.accountId);
+  if (!account) {
+    throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
+  }
+
+  // Check if the requesting user is the owner of the account
+  checkUserPermissions(req.user, account.userId);
+
+  //account ID stays the same, a trade only has meaning associated with the account, if somehow acounttrade was choosen incorrect at creation user should delete the entry.
+  trade.symbol = symbol !== undefined ? symbol : trade.symbol;
+  trade.tradeDate = tradeDate !== undefined ? new Date(tradeDate) : trade.tradeDate;
+  trade.entryTime = entryTime !== undefined ? new Date(`${tradeDate}T${entryTime}Z`) : trade.entryTime;
+  trade.exitTime = exitTime !== undefined ? new Date(`${tradeDate}T${exitTime}Z`) : trade.exitTime;
+  trade.entryPrice = entryPrice !== undefined ? entryPrice : trade.entryPrice;
+  trade.exitPrice = exitPrice !== undefined ? exitPrice : trade.exitPrice;
+  trade.size = size !== undefined ? size : trade.size;
+  trade.tradeType = tradeType !== undefined ? tradeType : trade.tradeType;
+  trade.notes = notes !== undefined ? notes : trade.notes;
+  trade.image = image !== undefined ? image : trade.image;
+
+  //save old netProfitloss
+  const oldNetProfitLoss = trade.netProfitLoss;
+  trade.netProfitLoss = netProfitLoss !== undefined ? netProfitLoss : trade.netProfitLoss
+
+  //save old fees
+  const oldFees = trade.fees
+  trade.fees = fees !== undefined ? fees : trade.fees
+
+  const updateBalance = (trade.netProfitLoss - trade.fees) - (oldNetProfitLoss - oldFees)
+  account.currentBalance += updateBalance
+
+  await account.save()
+  await trade.save()
+
+  res.status(StatusCodes.OK).json(trade);
+}
+const deleteTrade = async (req, res) => {
+
+  const { id } = req.params
+
+  const trade = await Trade.findById(id)
+  if (!trade) {
+    throw new CustomError.NotFoundError(`Trade with id: ${id} wasn't found`)
+  }
+
+  const account = await Account.findById(trade.accountId)
+
+  if (!account) {
+    throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
+  }
+
+  await checkPermissions(req.user, account.userId)
+  await trade.deleteOne();
+
+  res.status(StatusCodes.OK).json({ message: 'Trade deleted successfully' });
 }
 //admin
-const getAllTrades = async (req, res) =>{
-    
-      // Fetch all accounts and populate user details
-    const accounts = await Account.find()
+const getAllTrades = async (req, res) => {
+
+  // Fetch all accounts and populate user details
+  const accounts = await Account.find()
     .populate({
       path: 'userId',
       select: 'username',
@@ -265,19 +266,78 @@ const getAllTrades = async (req, res) =>{
   });
 
   res.status(StatusCodes.OK).json(result);
-      
+
 }
-const getAllTradeEntryManager = async (req, res) =>{
-    res.send('get all trades')
+const getAllTradeEntryManager = async (req, res) => {
+  res.send('get all trades')
 }
 
+//upload am excell File and create trady entrys based on that
+const uploadTradesExcell = async (req, res) => {
+
+  const { accountId } = req.params;
+
+  // file updated?
+  if (!req.files || !req.files.file) {
+    throw new CustomError.BadRequestError('File not found');
+  };
+
+  const file = req.files.file;
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(file.data);
+  const worksheet = workbook.worksheets[0];
+  
+  const jsonData = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return; //skip header
+    const rowData = {
+      accountId, 
+      notes: row.getCell(1).value,
+      symbol: row.getCell(2).value,
+      entryTime: new Date(row.getCell(3).value),
+      exitTime: new Date(row.getCell(4).value),
+      entryPrice: parseFloat(row.getCell(5).value),
+      exitPrice: parseFloat(row.getCell(6).value),
+      fees: parseFloat(row.getCell(7).value),
+      netProfitLoss: parseFloat(row.getCell(8).value),
+      size: parseInt(row.getCell(9).value, 10),
+      tradeType: row.getCell(10).value,
+      tradeDate: new Date(row.getCell(11).value),
+      platform: 'TopstepX',
+    };
+    jsonData.push(rowData);
+  });
+
+  for (const row of jsonData) {
+    const trade = new Trade(row);
+
+  
+    const account = await Account.findById(trade.accountId);
+    if (!account) {
+      throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
+    }
+    
+
+    await trade.save();
+
+    // Update account balance
+    account.currentBalance += trade.netProfitLoss - trade.fees;
+    await account.save();
+  }
+
+  // res.status(StatusCodes.CREATED).send('Trades imported successfully');
+  res.status(StatusCodes.CREATED).json({ jsonData });
+
+};
 
 module.exports = {
-    createTrade,
-    getAllTradesAccount,
-    getTrade,
-    updateTrade,
-    deleteTrade,
-    getAllTrades,
+  createTrade,
+  getAllTradesAccount,
+  getTrade,
+  updateTrade,
+  deleteTrade,
+  getAllTrades,
+  uploadTradesExcell,
 
 }

@@ -1,5 +1,6 @@
 const Trade = require('../models/Trade')
 const Account = require('../models/Account')
+const User = require('../models/User')
 const ExcelJS = require('exceljs');
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors')
@@ -269,7 +270,32 @@ const getAllTrades = async (req, res) => {
 
 }
 const getAllTradeEntryManager = async (req, res) => {
-  res.send('get all trades')
+
+  const managerId = req.user.userId;
+  console.log(managerId);
+
+  // Find all users managed by the logged-in manager
+  const managedUsers = await User.find({ managerId: managerId }).select('_id');
+  const managedUserIds = managedUsers.map(user => user._id);
+
+  if (managedUserIds.length === 0) {
+    throw new CustomError.NotFoundError('No users found');
+  }
+
+  // Aggregation pipeline
+   const pipeline = [
+      { $match: { userId: { $in: managedUserIds } } },
+      { $lookup: { from: 'trades', localField: '_id', foreignField: 'accountId', as: 'trades' } },
+      { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'user' } },
+      { $unwind: '$trades' },
+      { $unwind: '$user' },
+      { $group: { _id: '$accountName', user: { $first: '$user.username' }, trades: { $push: '$trades' } } },
+      { $project: { _id: 0, accountName: '$_id', user: 1, trades: 1 } }
+    ];
+
+  const tradesByAccount = await Account.aggregate(pipeline);
+  res.status(StatusCodes.OK).json({ tradesByAccount });
+  
 }
 
 //upload am excell File and create trady entrys based on that
@@ -286,13 +312,13 @@ const uploadTradesExcell = async (req, res) => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(file.data);
   const worksheet = workbook.worksheets[0];
-  
+
   const jsonData = [];
 
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; //skip header
     const rowData = {
-      accountId, 
+      accountId,
       notes: row.getCell(1).value,
       symbol: row.getCell(2).value,
       entryTime: new Date(row.getCell(3).value),
@@ -312,12 +338,13 @@ const uploadTradesExcell = async (req, res) => {
   for (const row of jsonData) {
     const trade = new Trade(row);
 
-  
+
     const account = await Account.findById(trade.accountId);
     if (!account) {
       throw new CustomError.NotFoundError(`Account with id: ${trade.accountId} wasn't found`);
     }
-    
+
+    checkUserPermissions(req.user, account.userId);
 
     await trade.save();
 
@@ -326,8 +353,8 @@ const uploadTradesExcell = async (req, res) => {
     await account.save();
   }
 
-  // res.status(StatusCodes.CREATED).send('Trades imported successfully');
-  res.status(StatusCodes.CREATED).json({ jsonData });
+  res.status(StatusCodes.CREATED).send('Trades imported successfully');
+  // res.status(StatusCodes.CREATED).json({ jsonData });
 
 };
 
@@ -339,5 +366,6 @@ module.exports = {
   deleteTrade,
   getAllTrades,
   uploadTradesExcell,
+  getAllTradeEntryManager,
 
 }

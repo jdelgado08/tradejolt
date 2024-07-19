@@ -12,6 +12,7 @@ const {
     deleteTrade,
     getAllTrades,
     uploadTradesExcell,
+    getAllTradeEntryManager,
     
 } = require('../controllers/tradeController')
 
@@ -23,6 +24,7 @@ router.route('/allEntrysAccount/:accountId').get(authenticateUser, getAllTradesA
 router.route('/upload/Excel/:accountId').post(authenticateUser,fileUploadMiddleware, uploadTradesExcell)
 
 router.route('/all').get(authenticateUser, authrorizePermissions('admin'), getAllTrades)
+router.route('/all/manager/userTrades').get(authenticateUser, authrorizePermissions('manager'), getAllTradeEntryManager)
 
 router.route('/:id')
     .get(authenticateUser, getTrade)

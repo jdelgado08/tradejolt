@@ -13,6 +13,7 @@ const authRouter = require('./routes/authRoutes')
 const userRouter = require('./routes/userRoutes')
 const accountRouter = require('./routes/accountRoutes')
 const tradeRouter = require('./routes/tradeRoutes')
+const commentRouter = require('./routes/commentRoutes')
 
 //DB
 const mongoDB = require('./db/connect')
@@ -40,6 +41,7 @@ app.use('/api/auth',authRouter)
 app.use('/api/users',userRouter) 
 app.use('/api/accounts',accountRouter) 
 app.use('/api/trades',tradeRouter) 
+app.use('/api/comments',commentRouter) 
 
 
 app.use(notFoundMiddleware)//once we "hit" here, we done, no next in this Middleware.

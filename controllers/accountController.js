@@ -4,8 +4,6 @@ const AccountBalance = require ('../models/AccountBalance');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const { 
-    createUserToken, 
-    cookieToRes, 
     checkPermissions 
 } = require('../utils');
 

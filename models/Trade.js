@@ -59,7 +59,8 @@ const tradeSchema = Schema({
     platform: {
         type : String,
         default : 'Manual Entry'
-    }
+    },
+    comment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', unique: true },
 }, { timestamps: true });
 
 

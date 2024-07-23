@@ -18,7 +18,6 @@ const {
 
 //routes
 
-router.route('/').post(authenticateUser,createTrade)
 router.route('/allEntrysAccount/:accountId').get(authenticateUser, getAllTradesAccount)
 
 router.route('/upload/Excel/:accountId').post(authenticateUser,fileUploadMiddleware, uploadTradesExcell)
@@ -27,6 +26,7 @@ router.route('/all').get(authenticateUser, authrorizePermissions('admin'), getAl
 router.route('/all/manager/userTrades').get(authenticateUser, authrorizePermissions('manager'), getAllTradeEntryManager)
 
 router.route('/:id')
+    .post(authenticateUser,createTrade)
     .get(authenticateUser, getTrade)
     .patch(authenticateUser,updateTrade)
     .delete(authenticateUser, deleteTrade)

@@ -13,8 +13,8 @@ const {
 //create a trade entry (only the userId associated with this Account can use this route)
 const createTrade = async (req, res) => {
 
+  const accountId = req.params.id;
   const {
-    accountId,
     symbol,
     tradeDate,
     entryTime,
@@ -28,7 +28,7 @@ const createTrade = async (req, res) => {
     image,
     netProfitLoss,
 
-  } = req.body
+  } = req.body;
 
   const account = await Account.findById(accountId)
 

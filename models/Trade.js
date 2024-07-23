@@ -1,6 +1,7 @@
 
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const Comment = require('./Comment');
 
 const tradeSchema = Schema({
 
@@ -74,6 +75,8 @@ tradeSchema.pre('deleteOne', { document: true, query: false }, async function(ne
         account.currentBalance -= updateBalance
         await account.save()
       }
+
+      await Comment.deleteOne({ tradeId: trade._id });
       next()
   });
 

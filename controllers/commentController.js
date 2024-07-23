@@ -1,5 +1,6 @@
-const Trade = require('../models/Trade')
-const Account = require('../models/Account')
+const Trade = require('../models/Trade');
+const Account = require('../models/Account');
+const User = require('../models/User');
 const Comment = require('../models/Comment');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
@@ -13,7 +14,7 @@ const createComment = async (req, res) => {
 
     const tradeId = req.params.id;
     const { content } = req.body;
-    const { userId } = req.user
+    const { userId } = req.user;
 
 
     console.log(content);
@@ -66,14 +67,33 @@ const getComment = async (req, res) => {
 
 const getAllComments = async (req, res) => {
 
-    //try to make in a single route, check for User ROle, and show based on:
-    // if role == admin -> show all users comments, do pipeline agregation to display with better meaning,
-    // if role == manager -> show all user managed, do pipeline agregation to display with better meaning,
-    // if role == user -> show all user comments, do pipeline agregation to display with better meaning,
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+  
+    let comments;
+  
+    if (userRole === 'admin') {
+      // Admin all comments
+      comments = await Comment.find()
+        .populate('userId', 'username')
+        .populate('tradeId', 'symbol tradeDate netProfitLoss');
 
-    //ps if work update allROutes of other controllers in a similar way.
+    } else if (userRole === 'manager') {
+      // Manager sees comments from users they manage
+      const managedUsers = await User.find({ managerId: userId }).select('_id');
+      const managedUserIds = managedUsers.map(user => user._id);
+      comments = await Comment.find({ userId: { $in: managedUserIds } })
+        .populate('userId', 'username')
+        .populate('tradeId', 'symbol tradeDate netProfitLoss');
 
-    res.send('get All Comments');
+    } else {
+      // User sees their own comments
+      comments = await Comment.find({ userId: userId })
+        .populate('userId', 'username')
+        .populate('tradeId', 'symbol tradeDate netProfitLoss');
+    }
+  
+    res.status(StatusCodes.OK).json({ comments });
 };
 
 const updateComment = async (req, res) => {
@@ -110,7 +130,7 @@ const deleteComment = async (req, res) => {
         throw new CustomError.NotFoundError(`Comment with id: ${commentId} wasn't found`);
     };
 
-    // Only the user who created the comment or an admin can delete it
+    // Only user who created OR admin can delete it.
     if (comment.userId.toString() !== userId.toString() && userRole !== 'admin') {
         throw new CustomError.UnauthorizedError('Not authorized to delete this comment');
     }
@@ -118,7 +138,7 @@ const deleteComment = async (req, res) => {
     // remove comment reference from trade
     const trade = await Trade.findOne({ comment: comment._id });
     if (trade) {
-        trade.comment = undefined; // or null
+        trade.comment = undefined; 
         await trade.save();
     }
 
@@ -128,7 +148,7 @@ const deleteComment = async (req, res) => {
 }
 
 //by the end update the .hook once we delete a trade we delete the comments aswell. DONE
-//.pos save to create a comment straight a trade creation if data passed
+//.pos save to create a comment straight a trade creation if data passed DONE
 
 
 module.exports = {

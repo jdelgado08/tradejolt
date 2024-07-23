@@ -182,10 +182,10 @@ const deleteTrade = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ message: 'Trade deleted successfully' });
 }
-//admin
+//Admin
 const getAllTrades = async (req, res) => {
 
-  // Fetch all accounts and populate user details
+  //All accounts and populate user details
   const accounts = await Account.find()
     .populate({
       path: 'userId',
@@ -203,9 +203,9 @@ const getAllTrades = async (req, res) => {
         select: 'username',
       },
     })
-    .select('-__v -createdAt -updatedAt'); // Exclude fields that you don't want in the response
+    .select('-__v -createdAt -updatedAt');
 
-  // Initialize result with accounts and their balances
+  //Initialize result with accounts and their balances
   const result = {};
 
   accounts.forEach(account => {
@@ -330,7 +330,7 @@ const uploadTradesExcell = async (req, res) => {
       size: parseInt(row.getCell(9).value, 10),
       tradeType: row.getCell(10).value,
       tradeDate: new Date(row.getCell(11).value),
-      platform: 'TopstepX',
+      platform: 'TopstepX', //add auto after, let as example
     };
     jsonData.push(rowData);
   });

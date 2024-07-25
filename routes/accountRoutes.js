@@ -19,7 +19,7 @@ const {
 
 
 
-router.route('/').post(authenticateUser, createAccount)
+router.route('/').post(authenticateUser, createAccount) //recheck
 //pick id from cookie
 router.route('/allUserAccounts').get(authenticateUser, getAllAccountsUser)
 //order

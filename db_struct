@@ -1,77 +1,77 @@
-User Schema
 
-- username: String, required, unique, trim
-- email: String, required, unique, trim
-- password: String, required
-- role: String, enum: ['Admin', 'Manager', 'User'], default: 'User'
-- firstName : String, default: 'First Name' 
-- lastName : String, default: 'Last Name' 
-- managerId: ObjectId, ref: 'User', default: null
+
+User Schema
+    username: String, required, unique, trim
+    email: String, required, unique, trim
+    password: String, required
+    role: String, enum: ['Admin', 'Manager', 'User'], default: 'User'
+    firstName: String, default: 'First Name'
+    lastName: String, default: 'Last Name'
+    managerId: ObjectId, ref: 'User', default: null
 
 
 Account Schema
-
-- userId: ObjectId, ref: 'User', required
-- accountName: String, required
-- initialBalance: Number, required
-- currentBalance: Number, required
+    userId: ObjectId, ref: 'User', required
+    accountName: String, required
+    initialBalance: Number, required
+    currentBalance: Number, required
 
 
 AccountBalance Schema
-
-- accountId: ObjectId, ref: 'Account', required
-- date: Date, required
-- balance: Number, required
+    accountId: ObjectId, ref: 'Account', required
+    date: Date, required
+    balance: Number, required
 
 
 Trade Schema
-
-- accountId: ObjectId, ref: 'Account', required
-- symbol: String, required
-- tradeDate: Date, required
-- entryTime: String,
-- exitTime: String,
-- entryPrice: Number, required
-- exitPrice: Number, required
-- size: Number, required
-- tradeType: String, enum: ['buy', 'short'], required
-- fees: Number, default: 0
-- notes: String
-- image: [String]
-- netProfitLoss: { type: Number, required: true }
-
-
-PriceAlert Schema
-
-- userId: ObjectId, ref: 'User', required
-- accountId: ObjectId, ref: 'Account', required
-- symbol: String, required
-- targetPrice: Number, required
-- alertType: String, enum: ['above', 'below'], required
-- triggered: Boolean, default: false
+    accountId: ObjectId, ref: 'Account', required
+    symbol: String, required
+    tradeDate: Date, required
+    entryTime: Date
+    exitTime: Date
+    entryPrice: Number, required
+    exitPrice: Number, required
+    size: Number, required
+    tradeType: String, enum: ['long', 'short'], required
+    fees: Number, default: 0, required
+    notes: String, maxlength: 1000
+    image: String, default: '/uploads/default.jpeg'
+    netProfitLoss: Number, required
+    platform: String, default: 'Manual Entry'
 
 
 Comment Schema
-
-- tradeId: ObjectId, ref: 'Trade', required
-- userId: ObjectId, ref: 'User', required
-- comment: String, required
-- date: Date, default: Date.now
+    tradeId: ObjectId, ref: 'Trade', required
+    userId: ObjectId, ref: 'User', required
+    content: String, required, maxlength: 1000
+    date: Date, default: Date.now
 
 
 Report Schema
+    userId: ObjectId, ref: 'User', required
+    accountId: ObjectId, ref: 'Account', required
+    period: String, enum: ['daily', 'weekly', 'monthly'], required
+    data: {
+        totalTrades: Number, required
+        winningTrades: Number, required
+        losingTrades: Number, required
+        netProfit: Number, required
+        averageProfit: Number, required
+        winRate: Number, required
+        totalBalance: Number, required
+    }
 
-- userId: ObjectId, ref: 'User', required
-- accountId: ObjectId, ref: 'Account', required
-- reportType: String, enum: ['daily', 'weekly', 'monthly'], required
-- content: String, required
-- date: Date, default: Date.now
 
+//not in use YET
 
 Market Schema
-
-- symbol: String, required
-- lastPrice: Number, required
-- timestamp: Date, required
-
-
+    symbol: String, required
+    lastPrice: Number, required
+    timestamp: Date, required
+PriceAlert Schema
+    userId: ObjectId, ref: 'User', required
+    accountId: ObjectId, ref: 'Account', required
+    symbol: String, required
+    targetPrice: Number, required
+    alertType: String, enum: ['above', 'below'], required
+    triggered: Boolean, default: false

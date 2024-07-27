@@ -1,11 +1,17 @@
 require('dotenv').config(); // Load environment variables
 const mongoose = require('mongoose');
 const moment = require('moment');
-const { createDailyReport } = require('../utils/createReport'); 
+const { 
+    createDailyReport,
+    createWeeklyReport,
+    createMonthlyReport,
+
+} = require('../utils/createReport'); 
+
 const Account = require('../models/Account');
 const mongoDB = require('../db/connect')
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 
 const testGenerateDailyReport = async () => {
     // Connect to MongoDB
@@ -19,18 +25,28 @@ const testGenerateDailyReport = async () => {
         }
     }
     
-    start()
+    start();
 
    
         // Hardcode values test propose only
         const accountId = '6696ac13f97b3a99e76b7c72';
-        const startDate = moment().subtract(1, 'day').startOf('day').toISOString();
-        const endDate = moment().subtract(1, 'day').endOf('day').toISOString();
+        //daily
+        // const startDate = moment().subtract(1, 'day').startOf('day').toISOString();
+        // const endDate = moment().subtract(1, 'day').endOf('day').toISOString();
+        //weekly
+        // const startDate = moment().subtract(1, 'week').startOf('week').toISOString();
+        // const endDate = moment().subtract(1, 'week').endOf('week').toISOString();
+        //monthy
+        const startDate = moment().subtract(1, 'month').startOf('month').toISOString();
+        const endDate = moment().subtract(1, 'month').endOf('month').toISOString();
+            
+        // await createDailyReport(accountId, startDate, endDate);
+        // await createWeeklyReport(accountId, startDate, endDate);
+        await createMonthlyReport(accountId, startDate, endDate);
 
-     
-        await createDailyReport(accountId, startDate, endDate);
-
-        console.log('Daily report generation test completed successfully.');
+        // console.log('Daily report created successfully.');
+        // console.log('Weeklt report created successfully.');
+        console.log('monthly report created successfully.');
    
 };
 

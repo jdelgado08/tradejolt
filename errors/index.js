@@ -4,6 +4,7 @@ const UnauthenticatedError = require('./unauthenticated');
 const UnauthorizedError = require('./unauthorized');
 const NotFoundError = require('./not-found');
 const BadRequestError = require('./bad-request');
+const ErrorGeneratingReport = require('./error-report');
 
 
 module.exports = {
@@ -12,6 +13,7 @@ module.exports = {
   NotFoundError,
   BadRequestError,
   UnauthorizedError,
+  ErrorGeneratingReport,
 
   
 };

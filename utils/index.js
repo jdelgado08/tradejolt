@@ -6,6 +6,12 @@ const {
 
 } = require('./checkPermissions')
 
+const {
+    createDailyReport,
+    createMonthlyReport,
+    createWeeklyReport,
+} = require('./createReport')
+
 module.exports = {
     creatJWT, 
     checkToken,
@@ -13,6 +19,8 @@ module.exports = {
     createUserToken,
     checkPermissions,
     checkUserPermissions,
+    createDailyReport,
+    createMonthlyReport,
+    createWeeklyReport,
 
-    
 }

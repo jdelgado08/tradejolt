@@ -49,6 +49,13 @@ const userSchema = Schema({
         ref: 'User',
         default: null
     },
+    isEmailConfirmed: {
+        type: Boolean,
+        default: false,
+    },
+    emailConfirmationToken: String,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
     
 }, {timestamps:true})
 

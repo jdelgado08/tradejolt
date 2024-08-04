@@ -8,6 +8,9 @@ const {
     loginUser,
     logoutUser,
     registerUserManager,
+    confirmEmail,
+    recoverPassword,
+    resetPassword,
 
 } = require('../controllers/authController')
 
@@ -18,5 +21,9 @@ router.post('/registerManager',authenticateUser,authrorizePermissions('admin'),r
 router.post('/register',registerUser)
 router.post('/login',loginUser)
 router.get('/logout',logoutUser)
+
+router.get('/confirm-email', confirmEmail);
+router.post('/recover-password', recoverPassword);
+router.post('/reset-password', resetPassword);
 
 module.exports = router

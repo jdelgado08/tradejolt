@@ -46,14 +46,14 @@ const deleteUser = async (req, res) => {
     }
     res.status(StatusCodes.OK).json({ user })
 
-    
+
 
 }
 //manager
 const getAllUsersManager = async (req, res) => {
-    
+
     const managerId = req.user.userId;
-    
+
     const managedUsers = await User.find({ managerId })
 
     // console.log(managedUsers);
@@ -62,10 +62,10 @@ const getAllUsersManager = async (req, res) => {
 
     if (userIds.length === 0) {
         throw new CustomError.NotFoundError(`No users found for the manager`);
-      }
+    }
 
 
-    res.status(StatusCodes.OK).json({ Users : userIds })
+    res.status(StatusCodes.OK).json({ Users: userIds })
 
 }
 
@@ -133,7 +133,61 @@ const getManager = async (req, res) => {
     res.status(StatusCodes.OK).json({ managers })
 }
 
+const selfDeactivate = async (req, res) => {
 
+    
+    const user = await User.findById(req.user.userId);
+    
+    if (!user) {
+        throw new CustomError.NotFoundError(`No user with id : ${req.user.userId}`)
+    }
+
+    checkPermissions(req.user, req.user.userId);
+
+    user.isActive = false;
+
+    await user.save();
+
+    res.status(StatusCodes.OK).json({ msg: "Your Accoiunt was deactivate, to activate again contact your manager" })
+}
+
+const deactivateUser = async (req, res) => {
+    
+    const { id } = req.params;
+
+    
+    const user = await User.findById(id);
+    if (!user) {
+        throw new CustomError.NotFoundError(`No user with id : ${id}`)
+    }
+    checkPermissions(req.user, user._id);
+
+    user.isActive = false;
+
+    await user.save();
+
+    res.status(StatusCodes.OK).json({ msg: "User was deactivate successfully!" })
+}
+
+const activateUser = async (req, res) => {
+    
+    const { id } = req.params;
+
+    if (req.user.role !== 'admin') {
+        throw new CustomError.UnauthorizedError('Only admins can activate users');
+    }
+    
+    const user =await User.findById(id);
+    if (!user) {
+        throw new CustomError.NotFoundError(`No user with id : ${id}`)
+    }
+
+    user.isActive = true;
+
+    await user.save();
+
+    res.status(StatusCodes.OK).json({ msg: "User was Activate successfully!" })
+}
 module.exports = {
     getAllUsers,
     getUser,
@@ -144,6 +198,9 @@ module.exports = {
     getManager,
     deleteUser,
     getAllUsersManager,
+    deactivateUser,
+    activateUser,
+    selfDeactivate,
 
 
 }

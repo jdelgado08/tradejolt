@@ -7,78 +7,78 @@ const tradeSchema = Schema({
 
     accountId: {
         type: Schema.Types.ObjectId,
-        ref : 'Account',
-        required : true,
+        ref: 'Account',
+        required: true,
     },
-    symbol : {
-        type : String,
-        required : [true, 'Please provide symbol of trade'],
+    symbol: {
+        type: String,
+        required: [true, 'Please provide symbol of trade'],
     },
     tradeDate: {
-        type : Date ,
-        required : [true, 'Please provide date'],
+        type: Date,
+        required: [true, 'Please provide date'],
     },
-    entryTime: { 
+    entryTime: {
         type: Date,
     },
-     exitTime: { 
+    exitTime: {
         type: Date,
     },
-    entryPrice: { 
+    entryPrice: {
         type: Number,
-        required : [true, 'Please provide entry price'],
+        required: [true, 'Please provide entry price'],
     },
-    exitPrice: { 
+    exitPrice: {
         type: Number,
-        required : [true, 'Please provide exit price'],
+        required: [true, 'Please provide exit price'],
     },
-    size: { 
-        type: Number, 
-        required : [true, 'Please provide size'],
+    size: {
+        type: Number,
+        required: [true, 'Please provide size'],
     },
-    tradeType: { 
+    tradeType: {
         type: String,
-        enum: ['Short', 'Long'], 
-        required: true 
+        enum: ['Short', 'Long'],
+        required: true
     },
-    fees: { 
-        type: Number, 
-        required : [true, 'Please provide value of fees'],
+    fees: {
+        type: Number,
+        required: [true, 'Please provide value of fees'],
     },
     notes: {
         type: String,
-        maxlength : [1000, 'Max lenght 1000 characteres'],
+        maxlength: [1000, 'Max lenght 1000 characteres'],
     },
     image: {
         type: String,
         default: '/uploads/default.jpeg'
     },
-    netProfitLoss: { 
-        type: Number, 
-        require : [true, 'Please provide value of net Profit or Loss'] 
+    netProfitLoss: {
+        type: Number,
+        require: [true, 'Please provide value of net Profit or Loss']
     },
     platform: {
-        type : String,
-        default : 'Manual Entry'
+        type: String,
+        default: 'Manual Entry'
     },
-    comment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', unique: true },
+
 }, { timestamps: true });
 
 
-tradeSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+tradeSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
 
-      const trade = this
-      const Account = require('./Account'); // Lazy loading to avoid circular dependency
-      const account = await Account.findById(trade.accountId)
-      if (account) {
+    const trade = this
+    const Account = require('./Account'); // Lazy loading to avoid circular dependency
+    const account = await Account.findById(trade.accountId)
+    if (account) {
         const updateBalance = trade.netProfitLoss - trade.fees
         account.currentBalance -= updateBalance
         await account.save()
-      }
+    }
 
-      await Comment.deleteOne({ tradeId: trade._id });
-      next()
-  });
+    await Comment.deleteOne({ tradeId: trade._id });
+    next()
+});
 
 
 const Trade = mongoose.model('Trade', tradeSchema);

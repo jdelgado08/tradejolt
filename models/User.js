@@ -56,6 +56,10 @@ const userSchema = Schema({
     emailConfirmationToken: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    isActive : {
+        type : Boolean,
+        default : true,
+    }
     
 }, {timestamps:true})
 
@@ -67,10 +71,18 @@ userSchema.pre('save', async function(){
     }    
 })
 
+// userSchema.post('save', async function (doc, next) {
+//     if (doc.role === 'manager' && !doc.managerId) {
+//       doc.managerId = doc._id;
+//       await doc.save();
+//     }
+//     next();
+//   });
+
 userSchema.post('save', async function (doc, next) {
-    if (doc.role === 'manager' && !doc.managerId) {
-      doc.managerId = doc._id;
-      await doc.save();
+    if (this.role === 'manager' && !this.managerId) {
+      this.managerId = this._id;
+      await this.save();
     }
     next();
   });

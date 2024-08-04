@@ -13,6 +13,9 @@ const {
     getManager,
     deleteUser,
     getAllUsersManager,
+    selfDeactivate,
+    activateUser,
+    deactivateUser,
 
 
 } = require('../controllers/userController')
@@ -31,6 +34,11 @@ router.route('/updateUserPassword').patch(authenticateUser,updateUserPassword)
 router.route('/getManager').get(authenticateUser,getManager)
 
 router.route('/:id').get(authenticateUser,getUser);
+
+router.route('/:id/activate').patch(authenticateUser,authrorizePermissions('admin'),activateUser);
+router.route('/:id/deactivate').patch(authenticateUser,deactivateUser);
+router.route('/selfDeactivate').patch(authenticateUser,selfDeactivate);
+
 
 
 

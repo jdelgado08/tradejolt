@@ -45,6 +45,10 @@ const loginUser = async (req, res) => {
         throw new CustomError.UnauthenticatedError('Invalid Credentials');
     };
 
+    if (!user.isActive) {
+        throw new CustomError.BadRequestError('Your Account is Innactive pls contact your manager.')
+    }
+
     if (!user.isEmailConfirmed) {
         throw new CustomError.UnauthenticatedError('Please confirm your email to login');
     }

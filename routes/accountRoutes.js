@@ -12,8 +12,8 @@ const {
     deleteAccount,
     getAllAccounts,
     getAllAccountsManager,
+    accountIsActive,
     
-
 
 } = require('../controllers/accountController')
 
@@ -29,8 +29,9 @@ router.route('/:id')
     .get(authenticateUser, getAccount)
     .patch(authenticateUser, updateAccount)
 
-router.route('/:id').delete(authenticateUser, authrorizePermissions('admin'), deleteAccount)
+router.route('/:id').delete(authenticateUser, authrorizePermissions('admin'), deleteAccount);
 
+router.route('/:id/status').patch(authenticateUser,authrorizePermissions('admin'), accountIsActive);
 
 
 

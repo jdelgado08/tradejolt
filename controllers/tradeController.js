@@ -32,11 +32,20 @@ const createTrade = async (req, res) => {
 
   } = req.body;
 
-  const account = await Account.findById(accountId)
+  const account = await Account.findById(accountId);
 
   if (!account) {
     throw new CustomError.NotFoundError(`Account with id: ${accountId} wasn't found`)
   }
+
+  const user = await User.findById(account.userId);
+
+  // console.log('PING PING');
+  if (!user.isActive || !account.isActive) {
+    throw new CustomError.NotFoundError(`User or account is inactive`)
+  }
+  //console.log('PING PING 2');
+
 
   checkUserPermissions(req.user, account.userId)
 

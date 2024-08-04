@@ -160,6 +160,30 @@ const getAllAccountsManager = async (req, res) => {
     res.status(StatusCodes.OK).json({ Accounts : accounts });
 };
 
+const accountIsActive = async (req, res) =>{
+
+    //get Account ID -params
+    //get isActive - body
+    //change isActive
+    //make sure route is protect only by admin acess
+
+    const {id} = req.params;
+    const {isActive } = req.body;
+
+    console.log(id);
+    const account = await Account.findById( id );
+    console.log(account);
+    if (!account) {
+        throw new CustomError.NotFoundError(`No account with id : ${id}`);
+    }
+
+    account.isActive = isActive;
+
+    account.save();
+    
+    res.status(StatusCodes.OK).json({ msg : "Account state updated successfully" });
+
+};
 module.exports = {
     createAccount,
     getAllAccountsUser,
@@ -167,5 +191,6 @@ module.exports = {
     updateAccount,
     deleteAccount,
     getAllAccounts,
-    getAllAccountsManager
+    getAllAccountsManager,
+    accountIsActive,
 };

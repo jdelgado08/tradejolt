@@ -29,24 +29,24 @@ const testGenerateDailyReport = async () => {
 
    
         // Hardcode values test propose only
-        const accountId = '6696ac13f97b3a99e76b7c72';
+        const accountId = '66b125448da2231dd30c934e';
         //daily
-        // const startDate = moment().subtract(1, 'day').startOf('day').toISOString();
-        // const endDate = moment().subtract(1, 'day').endOf('day').toISOString();
+        const startDate = moment().subtract(1, 'day').startOf('day').toISOString();
+        const endDate = moment().subtract(1, 'day').endOf('day').toISOString();
         //weekly
         // const startDate = moment().subtract(1, 'week').startOf('week').toISOString();
         // const endDate = moment().subtract(1, 'week').endOf('week').toISOString();
         //monthy
-        const startDate = moment().subtract(1, 'month').startOf('month').toISOString();
-        const endDate = moment().subtract(1, 'month').endOf('month').toISOString();
+        // const startDate = moment().subtract(1, 'month').startOf('month').toISOString();
+        // const endDate = moment().subtract(1, 'month').endOf('month').toISOString();
             
-        // await createDailyReport(accountId, startDate, endDate);
+        await createDailyReport(accountId, startDate, endDate);
         // await createWeeklyReport(accountId, startDate, endDate);
-        await createMonthlyReport(accountId, startDate, endDate);
+        // await createMonthlyReport(accountId, startDate, endDate);
 
-        // console.log('Daily report created successfully.');
+        console.log('Daily report created successfully.');
         // console.log('Weeklt report created successfully.');
-        console.log('monthly report created successfully.');
+        // console.log('monthly report created successfully.');
    
 };
 

@@ -3,15 +3,98 @@ const AccountBalance = require('../models/AccountBalance');
 const Report = require('../models/Report');
 const Account = require('../models/Account');
 const CustomError = require('../errors')
+const User = require('../models/User');
+const sendMail = require('./sendEmail');
 
 
+
+const generateReportHTML = (accountName, reportType, summaryData, trades) => {
+  const tradesContent = trades.map(trade => `
+    <tr>
+      <td>${trade.symbol}</td>
+      <td>${trade.tradeDate}</td>
+      <td>${trade.entryPrice}</td>
+      <td>${trade.exitPrice}</td>
+      <td>${trade.netProfitLoss}</td>
+    </tr>`).join('');
+
+  return `
+    <html>
+      <body>
+        <h1>${reportType} Trade Report for Account: ${accountName}</h1>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Net PnL</th>
+              <th>Total Contracts</th>
+              <th>Total Fees</th>
+              <th>Total Trades</th>
+              <th>Avg Winning Trade</th>
+              <th>Avg Losing Trade</th>
+              <th>Winning Trade Percent</th>
+              <th>Total Account Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${summaryData.netPnL}</td>
+              <td>${summaryData.totalContracts}</td>
+              <td>${summaryData.totalFees}</td>
+              <td>${summaryData.totalTrades}</td>
+              <td>${summaryData.avgWinningTrade}</td>
+              <td>${summaryData.avgLosingTrade}</td>
+              <td>${summaryData.winningTradePercent}</td>
+              <td>${summaryData.totalAccountBalance}</td>
+            </tr>
+          </tbody>
+        </table>
+        <h2>Trades:</h2>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Trade Date</th>
+              <th>Entry Price</th>
+              <th>Exit Price</th>
+              <th>Net Profit/Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tradesContent}
+          </tbody>
+        </table>
+      </body>
+    </html>`;
+};
+
+// Helper Function for Sending Email
+const sendReportEmail = async (userEmail, accountName, reportType, reportHTML) => {
+  const mailOptions = {
+    to: userEmail,
+    subject: `${reportType} Trade Report for Account: ${accountName}`,
+    text: `Please find the attached ${reportType.toLowerCase()} trade report for your account: ${accountName}.`,
+    html: reportHTML,
+  };
+
+  await sendMail(mailOptions);
+};
+
+
+
+//reports creation
 const createDailyReport = async (accountId, startDate, endDate) => {
 
   const account = await Account.findById(accountId);
 
+  //or account.isActive = false throw error
   if (!account) {
     throw new CustomError.NotFoundError(`Account with id ${accountId} not found`); 
   };
+
+  const user = await User.findById(account.userId);
+  if (!user) {
+    throw new CustomError.NotFoundError(`User with id ${account.userId} not found`);
+  }
 
   const trades = await Trade.find({
     accountId,
@@ -73,6 +156,24 @@ const createDailyReport = async (accountId, startDate, endDate) => {
 
   await report.save();
   //test env
+
+  const summaryData = {
+    netPnL,
+    totalContracts,
+    totalFees,
+    totalTrades,
+    avgWinningTrade,
+    avgLosingTrade,
+    winningTradePercent,
+    totalAccountBalance: actualAccountBalance?.balance || 0
+  };
+
+  const reportHTML = generateReportHTML(account.accountName, 'Daily', summaryData, trades);
+
+  if (account.emailReport) {
+    await sendReportEmail(user.email, account.accountName, 'Daily', reportHTML);
+  }
+
   console.log(`Daily report generated for account ${accountId}`);
 };
 

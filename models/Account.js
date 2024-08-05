@@ -28,6 +28,10 @@ const accountSchema = Schema ({
         type : Boolean,
         default : true,
     },
+    emailReport: {
+      type: Boolean,
+      default: false,
+    },
 },{timestamps : true})
 
 accountSchema.pre('save', function (next) {

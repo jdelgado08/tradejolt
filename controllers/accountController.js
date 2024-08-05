@@ -65,7 +65,7 @@ const getAccount = async (req, res) => {
 
 const updateAccount = async (req, res) => {
     const {id} = req.params;
-    const {accountName, newBalance} = req.body;
+    const {accountName, newBalance, emailReport} = req.body;
 
     const account  = await Account.findById(id);
     if (!account){
@@ -89,12 +89,10 @@ const updateAccount = async (req, res) => {
         account.currentBalance = updatedBalance;
     }
     
-    // await AccountBalance.create({
-    //     accountId: account._id,
-    //     date: new Date(),
-    //     balance: updatedBalance
-    //   });
-    //making this with hook post atm
+    if (emailReport) {
+        account.emailReport = emailReport;
+    }
+
     await account.save();  
     
     res.status(StatusCodes.OK).json(account);

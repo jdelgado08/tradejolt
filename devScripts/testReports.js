@@ -1,53 +1,47 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 const mongoose = require('mongoose');
 const moment = require('moment');
 const { 
     createDailyReport,
     createWeeklyReport,
     createMonthlyReport,
-
 } = require('../utils/createReport'); 
 
-const Account = require('../models/Account');
-const mongoDB = require('../db/connect')
-const express = require('express');
-const app = express();
+
+const mongoDB = require('../db/connect');
 
 const testGenerateDailyReport = async () => {
-    // Connect to MongoDB
-    const port = process.env.PORT || 3000
-    const start = async () => {
-        try {
-            await mongoDB()
-            app.listen(port, console.log(`Server is listening at port ${port}!!!`))
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    try {
     
-    start();
 
-   
-        // Hardcode values test propose only
-        const accountId = '66b125448da2231dd30c934e';
+        await mongoDB();
+    
+
+        const accountId = '66b125448da2231dd30c934e'; // Example accountId, change as needed
+        
+        // date Range
+        const startDate = moment().subtract(2, 'day').startOf('day').toISOString();
+        const endDate = moment().subtract(2, 'day').endOf('day').toISOString();
+
         //daily
-        const startDate = moment().subtract(1, 'day').startOf('day').toISOString();
-        const endDate = moment().subtract(1, 'day').endOf('day').toISOString();
-        //weekly
-        // const startDate = moment().subtract(1, 'week').startOf('week').toISOString();
-        // const endDate = moment().subtract(1, 'week').endOf('week').toISOString();
-        //monthy
-        // const startDate = moment().subtract(1, 'month').startOf('month').toISOString();
-        // const endDate = moment().subtract(1, 'month').endOf('month').toISOString();
-            
         await createDailyReport(accountId, startDate, endDate);
-        // await createWeeklyReport(accountId, startDate, endDate);
-        // await createMonthlyReport(accountId, startDate, endDate);
-
         console.log('Daily report created successfully.');
-        // console.log('Weeklt report created successfully.');
-        // console.log('monthly report created successfully.');
-   
+
+        //weekly
+        // await createWeeklyReport(accountId, startDate, endDate);
+        // console.log('Weekly report created successfully.');
+
+        //monthly
+        // await createMonthlyReport(accountId, startDate, endDate);
+        // console.log('Monthly report created successfully.');
+        
+    } catch (error) {
+        console.error('Error generating report:', error);
+    } finally {
+        
+        await mongoose.disconnect();
+        console.log('Disconnected from MongoDB');
+    }
 };
 
 testGenerateDailyReport();

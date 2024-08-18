@@ -168,9 +168,9 @@ const accountIsActive = async (req, res) =>{
     const {id} = req.params;
     const {isActive } = req.body;
 
-    console.log(id);
+    
     const account = await Account.findById( id );
-    console.log(account);
+
     if (!account) {
         throw new CustomError.NotFoundError(`No account with id : ${id}`);
     }
@@ -182,6 +182,8 @@ const accountIsActive = async (req, res) =>{
     res.status(StatusCodes.OK).json({ msg : "Account state updated successfully" });
 
 };
+
+
 module.exports = {
     createAccount,
     getAllAccountsUser,

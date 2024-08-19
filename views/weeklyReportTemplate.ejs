@@ -1,0 +1,65 @@
+<h1>Weekly Trade Report for Account: <%= accountName %></h1>
+
+<!-- Weekly Summary Table -->
+<table border="1">
+  <thead>
+    <tr>
+      <th>Net PnL</th>
+      <th>Total Contracts</th>
+      <th>Total Fees</th>
+      <th>Total Trades</th>
+      <th>Avg Winning Trade</th>
+      <th>Avg Losing Trade</th>
+      <th>Winning Trade Percent</th>
+      <th>Total Account Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><%= summaryData.netPnL %></td>
+      <td><%= summaryData.totalContracts %></td>
+      <td><%= summaryData.totalFees %></td>
+      <td><%= summaryData.totalTrades %></td>
+      <td><%= summaryData.avgWinningTrade %></td>
+      <td><%= summaryData.avgLosingTrade %></td>
+      <td><%= summaryData.winningTradePercent %></td>
+      <td><%= summaryData.totalAccountBalance %></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Daily Breakdown for the Week:</h2>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Net PnL</th>
+      <th>Total Contracts</th>
+      <th>Total Fees</th>
+      <th>Total Trades</th>
+      <th>Avg Winning Trade</th>
+      <th>Avg Losing Trade</th>
+      <th>Winning Trade Percent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (dailyReports && dailyReports.length > 0) { %>
+      <% dailyReports.forEach(daily => { %>
+        <tr>
+          <td><%= formatDate(daily.date) %></td>
+          <td><%= daily.data.netPnL %></td>
+          <td><%= daily.data.totalContracts %></td>
+          <td><%= daily.data.totalFees %></td>
+          <td><%= daily.data.totalTrades %></td>
+          <td><%= daily.data.avgWinningTrade %></td>
+          <td><%= daily.data.avgLosingTrade %></td>
+          <td><%= daily.data.winningTradePercent %></td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr>
+        <td colspan="8">No daily reports found for this period.</td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>

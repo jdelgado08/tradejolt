@@ -15,7 +15,7 @@ const reportSchema = new Schema({
   },
   period: {
     type: String,
-    enum: ['daily', 'weekly', 'monthly'],
+    enum: ['daily', 'weekly', 'monthly', 'custom'],
     required: true
   },
   date: {

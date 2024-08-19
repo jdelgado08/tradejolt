@@ -15,6 +15,7 @@ const userRouter = require('./routes/userRoutes');
 const accountRouter = require('./routes/accountRoutes');
 const tradeRouter = require('./routes/tradeRoutes');
 const commentRouter = require('./routes/commentRoutes');
+const reportRouter = require('./routes/reportRoutes');
 
 //DB
 const mongoDB = require('./db/connect');
@@ -43,6 +44,9 @@ app.use('/api/users', userRouter);
 app.use('/api/accounts', accountRouter);
 app.use('/api/trades', tradeRouter);
 app.use('/api/comments', commentRouter);
+
+console.log('Report router loaded');
+app.use('/api/reports', reportRouter);
 
 
 app.use(notFoundMiddleware)//once we "hit" here, we done, no next in this Middleware.

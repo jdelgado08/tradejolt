@@ -1,17 +1,12 @@
 const sendEmail = require('./sendEmail');
-const generateReportHTML = require('./generateReportHTML');
 
-//send reports by mail
-const sendReportEmail = async (userEmail, accountName, reportType, summaryData, trades) => {
-  //dinamique HtML
-  const reportHTML = await generateReportHTML(accountName, reportType, summaryData, trades);
-
+// Send reports by mail
+const sendReportEmail = async (userEmail, subject, reportHTML) => {
   await sendEmail({
     to: userEmail,
-    subject: `${reportType} Trade Report for Account: ${accountName}`,
+    subject: subject,
     html: reportHTML,
-    text: `Please find the attached ${reportType.toLowerCase()} trade report for your account: ${accountName}.`,
-
+    text: `Please find the attached report.`,
   });
 };
 

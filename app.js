@@ -45,7 +45,7 @@ app.use('/api/accounts', accountRouter);
 app.use('/api/trades', tradeRouter);
 app.use('/api/comments', commentRouter);
 
-console.log('Report router loaded');
+// console.log('Report router loaded');
 app.use('/api/reports', reportRouter);
 
 

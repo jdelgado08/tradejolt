@@ -9,8 +9,10 @@ const generateReportHTML = async (accountName, reportType, summaryData, trades =
 
   switch (reportType) {
     case 'daily':
-    case 'custom':
       templatePath = path.join(__dirname, '../views/dailyReportTemplate.ejs');
+      break;
+    case 'custom':
+      templatePath = path.join(__dirname, '../views/customReportTemplate.ejs');
       break;
     case 'weekly':
       templatePath = path.join(__dirname, '../views/weeklyReportTemplate.ejs');

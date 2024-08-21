@@ -1,21 +1,19 @@
 const Report = require('../models/Report');
-const Account = require('../models/Account');
-const { StatusCodes } = require('http-status-codes')
+const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { createDailyReport } = require('../utils/createReport');
-const { checkPermissions } = require('../utils/checkPermissions');
+const { getAccessibleAccounts } = require('../utils/checkPermissions');
 
-//Get all reports based on role and accessible accounts
 const getAllReports = async (req, res) => {
 
     const { reportType, startDate, endDate } = req.query;
+    const accessibleAccounts = await getAccessibleAccounts(req.user);
+
     const query = {};
 
-    if (req.accessibleAccounts) {
-        query.accountId = { $in: req.accessibleAccounts };
+    if (accessibleAccounts.length > 0) {
+        query.accountId = { $in: accessibleAccounts };
     }
 
-    //Apply report filters based on type, date range, etc.
     if (reportType) query.period = reportType;
     if (startDate && endDate) {
         query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
@@ -23,39 +21,34 @@ const getAllReports = async (req, res) => {
 
     const reports = await Report.find(query);
 
+    if (reports.length === 0) {
+        return res.status(StatusCodes.OK).json({ msg: "No reports found." });
+    }
     res.status(StatusCodes.OK).json({ reports });
 };
 
-
-// Get reports for a specific account
 const getAccountReport = async (req, res) => {
     const { accountId } = req.params;
-
-    const account = await Account.findById(accountId);
-    if (!account) {
-        throw new CustomError.NotFoundError('Account not found');
-    }
-
-    // Check if the user has permission to access this account
-    await checkPermissions(req.user, account.userId);
-
     const { reportType, startDate, endDate } = req.query;
-    const query = { accountId };
 
-    // Apply report filters based on type, date range, etc.
+    await getAccessibleAccounts(req.user, accountId);
+
+    const query = { accountId };
     if (reportType) query.period = reportType;
     if (startDate && endDate) {
         query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-
     const reports = await Report.find(query);
 
-    res.status(StatusCodes.OK).json({ reports });
+    if (reports.length === 0) {
+        return res.status(StatusCodes.NOT_FOUND).json({ msg: 'No reports found' });
+    }
 
+    res.status(StatusCodes.OK).json({ reports });
 };
 
-// Create a custom report using the existing daily report logic
+
 const createCustomReport = async (req, res) => {
     const { accountId, startDate, endDate } = req.body;
 
@@ -63,10 +56,10 @@ const createCustomReport = async (req, res) => {
         throw new CustomError.BadRequestError('AccountId, startDate, and endDate are required');
     }
 
+    await getAccessibleAccounts(req.user, accountId);
 
     const report = await createDailyReport(accountId, startDate, endDate, 'custom');
     res.status(StatusCodes.CREATED).json({ report });
-
 };
 
 module.exports = {

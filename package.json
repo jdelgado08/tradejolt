@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@alpacahq/alpaca-trade-api": "^3.1.1",
     "archiver": "^7.0.1",
     "archiver-utils": "^5.0.2",
     "bcryptjs": "^2.4.3",
@@ -21,7 +22,7 @@
     "express-async-errors": "^3.1.1",
     "express-fileupload": "^1.5.1",
     "express-mongo-sanitize": "^2.1.0",
-    "express-rate-limit": "^5.4.1",
+    "express-rate-limit": "^5.5.1",
     "helmet": "^4.6.0",
     "http-status-codes": "^2.1.4",
     "joi": "^17.4.0",

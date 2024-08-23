@@ -6,21 +6,28 @@ const priceAlertSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: 'User', 
     required: true 
-},
+  },
   symbol: { 
     type: String, 
-    require: [true, 'Please provide symbol to Alert']
-},
+    required: [true, 'Please provide a symbol for the alert'] 
+  },
   priceLevel: { 
     type: Number, 
-    require: [true, 'Please provide price Level'] 
-},
+    required: [true, 'Please provide a price level'] 
+  },
   condition: { 
     type: String, 
-    //adjust this field when controllers done!!
     enum: ['above', 'below'], 
     required: true 
-},  
+  },
+  isActive: { 
+    type: Boolean, 
+    default: true 
+  },
+  hasTriggered: { 
+    type: Boolean, 
+    default: false 
+  },
 }, { timestamps: true });
 
 const PriceAlert = mongoose.model('PriceAlert', priceAlertSchema);

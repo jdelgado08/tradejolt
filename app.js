@@ -16,9 +16,12 @@ const accountRouter = require('./routes/accountRoutes');
 const tradeRouter = require('./routes/tradeRoutes');
 const commentRouter = require('./routes/commentRoutes');
 const reportRouter = require('./routes/reportRoutes');
+const priceAlertRouter = require('./routes/priceAlertRoutes');
 
 //DB
 const mongoDB = require('./db/connect');
+//ALPACA API
+const { connectAlpaca } = require('./API/alpaca');
 
 
 //middleware
@@ -44,9 +47,9 @@ app.use('/api/users', userRouter);
 app.use('/api/accounts', accountRouter);
 app.use('/api/trades', tradeRouter);
 app.use('/api/comments', commentRouter);
-
 // console.log('Report router loaded');
 app.use('/api/reports', reportRouter);
+app.use('/api/priceAlert', priceAlertRouter);
 
 
 app.use(notFoundMiddleware)//once we "hit" here, we done, no next in this Middleware.
@@ -57,11 +60,13 @@ const port = process.env.PORT || 3000
 //db connection
 const start = async () => {
     try {
-        await mongoDB()//return promise
-        app.listen(port, console.log(`Server is listening at port ${port}!!!`))
+        await mongoDB();//return promise
+        // await connectAlpaca();
+
+        app.listen(port, console.log(`Server is listening at port ${port}!!!`));
     } catch (error) {
         console.log(error);
     }
-}
+};
 
 start();

@@ -1,8 +1,12 @@
 # TradeJolt
 
-TradeJolt is a comprehensive real-time price alert and trading management system designed to empower users in the financial markets. It combines real-time price alerts, automated and manual trading strategies, and a robust user management system. Users can create and manage multiple trading accounts, generate detailed reports, and receive real-time notifications on stock and cryptocurrency price movements.
+TradeJolt is a comprehensive trading management system designed to help users efficiently track and manage their trades across multiple accounts. This system provides users with real-time price alerts for stocks, enabling them to stay informed about market movements. While not a direct trading platform, TradeJolt serves as a powerful tool for registering trades made on external platforms, allowing users to keep detailed records of their trading activity.
 
-The system is built using modern web technologies, ensuring seamless real-time data processing, efficient management of user data, and integration with financial APIs for accurate and timely trading information.
+Users can choose between manual and automated methods to log their trades, making TradeJolt adaptable to different trading styles. The platform also supports the creation and management of multiple trading accounts, detailed report generation, and email notifications, helping traders stay organized and informed.
+
+TradeJolt is built using modern web technologies, ensuring seamless real-time data processing, efficient user data management, and integration with financial APIs for accurate and timely price information. In addition to these features, TradeJolt incorporates elements of a trading journal, allowing users to document their trade history and gain insights through the system's reporting tools.
+
+This project was developed as part of my final year as a software engineering student, with a focus on building a versatile tool that enhances the way traders interact with the markets.
 
 ## Features
 

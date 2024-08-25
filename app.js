@@ -20,6 +20,7 @@ const priceAlertRouter = require('./routes/priceAlertRoutes');
 
 //DB
 const mongoDB = require('./db/connect');
+const { restoreActiveAlerts } = require('./utils/apcaWsClient');
 //ALPACA API
 const { connectAlpaca } = require('./API/alpaca');
 
@@ -60,8 +61,8 @@ const port = process.env.PORT || 3000
 //db connection
 const start = async () => {
     try {
-        await mongoDB();//return promise
-        // await connectAlpaca();
+        await mongoDB();
+        await restoreActiveAlerts(); //restore alarms
 
         app.listen(port, console.log(`Server is listening at port ${port}!!!`));
     } catch (error) {

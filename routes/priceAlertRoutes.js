@@ -1,15 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    subscribeTrades, 
-    unsubscribeTrades, 
-    stopWebSocket 
+const { authenticateUser } = require('../middleware/authentication');
+const {
+    createPriceAlert,
+    getPriceAlerts,
+    deletePriceAlert,
+    updatePriceAlert
 } = require('../controllers/priceAlertController');
 
-const wsLimiter = require('../middleware/webSocketLimiter');
+router.post('/', authenticateUser, createPriceAlert);
 
-router.post('/subscribe', wsLimiter, subscribeTrades);
-router.post('/unsubscribe', wsLimiter, unsubscribeTrades);
-router.post('/stop', wsLimiter, stopWebSocket);
+router.get('/', authenticateUser, getPriceAlerts);
+
+router.delete('/:id', authenticateUser, deletePriceAlert);
+
+router.put('/:id', authenticateUser, updatePriceAlert);
 
 module.exports = router;

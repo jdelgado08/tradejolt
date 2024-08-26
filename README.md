@@ -20,12 +20,12 @@ This project was developed as part of my final year as a software engineering st
 - **Automated Alerts**: The system automatically triggers alerts based on real-time price data from the Alpaca API, ensuring users are notified as soon as conditions are met.
 - **WebSocket Management**: Efficient WebSocket handling to ensure real-time data streaming without unnecessary resource consumption.
 
-### Automated & Manual Trading
-- **Manual Trading**: Users can execute trades manually within the platform, allowing them to make real-time decisions based on current market data.
-- **Automated Trading**: Integration with trading algorithms that execute trades automatically based on predefined strategies, making it easier for users to implement systematic trading approaches.
+### Automated & Manual Trade Logging
+- **Manual Trade Logging**: Users can manually log their trades within the platform. This feature allows traders to document trades executed on external trading platforms, ensuring they can track and review their actions based on 
+- **Automated Trade Logging**: Users can automate the logging of trades by integrating predefined criteria within the system. This automated process records trades executed on external platforms based on the user's predefined strategies, helping to streamline the record-keeping process without requiring manual input for every trade.
 
 ### Reporting & Analytics
-- **Report Generation**: Users can generate detailed reports on their trading performance, account activity, and alert history. Reports can be customized and exported in various formats (PDF, CSV).
+- **Report Generation**: Users can generate detailed reports on their trading performance, account activity, and alert history. 
 - **Trade Tracking**: Every trade executed manually or automatically is logged and tracked, allowing users to analyze their trading history and performance.
 - **Portfolio Analysis**: Users receive insights into their portfolios, helping them make informed decisions on rebalancing, risk management, and strategy adjustments.
 

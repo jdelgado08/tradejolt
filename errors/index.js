@@ -5,6 +5,7 @@ const UnauthorizedError = require('./unauthorized');
 const NotFoundError = require('./not-found');
 const BadRequestError = require('./bad-request');
 const ErrorGeneratingReport = require('./error-report');
+const WebSocketError = require('./webSocketError');
 
 
 module.exports = {
@@ -14,6 +15,7 @@ module.exports = {
   BadRequestError,
   UnauthorizedError,
   ErrorGeneratingReport,
+  WebSocketError,
 
   
 };

@@ -64,6 +64,8 @@ const getAccessibleAccounts = async (requestUser, accountId = null) => {
     return accounts.map(account => account._id);
 };
 
+
+
 module.exports = {
     checkPermissions,
     checkUserPermissions,

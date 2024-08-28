@@ -1,7 +1,10 @@
 const Report = require('../models/Report');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { getAccessibleAccounts } = require('../utils/checkPermissions');
+const { 
+    getAccessibleAccounts,
+    checkPermissions,
+ } = require('../utils/checkPermissions');
 
 const getAllReports = async (req, res) => {
 
@@ -62,8 +65,26 @@ const createCustomReport = async (req, res) => {
     res.status(StatusCodes.CREATED).json({ report });
 };
 
+const deleteReport = async (req, res) => {
+
+    const { id } = req.params;
+
+    const report = await Report.findById(id);
+    if (!report) {
+        console.log(`Report with ID ${id} not found.`);
+        return res.status(StatusCodes.NOT_FOUND).json({ message: 'Report not found' });
+    }
+
+    checkPermissions(req.user, report.userId);
+
+    await Report.findByIdAndDelete(id);
+    console.log(`Report with ID ${id} has been deleted.`);
+
+    res.status(StatusCodes.OK).json({ message: 'Report deleted successfully' });
+};
 module.exports = {
     getAllReports,
     getAccountReport,
     createCustomReport,
+    deleteReport,
 };

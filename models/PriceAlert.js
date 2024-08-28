@@ -28,7 +28,12 @@ const priceAlertSchema = new Schema({
     type: Boolean, 
     default: false 
   },
+  userEmail: {
+    type : String,
+    require : [true, 'Please provide a valid email'] 
+  }
 }, { timestamps: true });
 
 const PriceAlert = mongoose.model('PriceAlert', priceAlertSchema);
 module.exports = PriceAlert;
+

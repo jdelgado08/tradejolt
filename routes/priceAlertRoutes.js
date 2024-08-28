@@ -5,7 +5,8 @@ const {
     createPriceAlert,
     getPriceAlerts,
     deletePriceAlert,
-    updatePriceAlert
+    updatePriceAlert,
+    manualTrigger,
 } = require('../controllers/priceAlertController');
 
 router.post('/', authenticateUser, createPriceAlert);

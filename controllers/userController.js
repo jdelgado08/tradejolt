@@ -81,6 +81,8 @@ const getUser = async (req, res) => {
 }
 const showUser = async (req, res) => {
     //no need to query DB, have user in Cookie
+    console.log(req.user);
+    
     res.status(StatusCodes.OK).json({ user: req.user })
 }
 const updateUser = async (req, res) => {

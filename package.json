@@ -38,9 +38,12 @@
     "punycode": "^2.3.1",
     "rimraf": "^6.0.1",
     "sanitize-html": "^2.13.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tr46": "^5.0.0",
     "validator": "^13.6.0",
-    "whatwg-url": "^14.0.0"
+    "whatwg-url": "^14.0.0",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

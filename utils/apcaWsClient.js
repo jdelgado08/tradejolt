@@ -1,7 +1,7 @@
 const { alpaca } = require('../API/alpaca');
 const PriceAlert = require('../models/PriceAlert');
 const sendEmail = require('../utils/sendEmail');
-const WebSocketError = require('../errors/WebSocketError');
+const WebSocketError = require('../errors/webSocketError');
 
 let ws;
 let isConnected = false;

@@ -52,7 +52,16 @@ app.use(cookieParser(process.env.JWT_STRING))//acess the cookie
 //     })
 // );
 app.use(helmet());
-app.use(cors());
+const corsOptions = {
+    origin: [
+      'https://tradejolt.onrender.com',  
+      'https://tradejolt.onrender.com/tradeJolt-api-docs', 
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, 
+    allowedHeaders: 'Content-Type,Authorization',
+  };
+app.use(cors(corsOptions));
 // app.use(xss()); need to do middleware to it...
 
 // Routes

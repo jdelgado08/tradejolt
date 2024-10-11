@@ -12,8 +12,8 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: 'http://localhost:3000/api', //when needed replace for prod URL
-      description: 'Development Server',
+        url: 'https://tradejolt.onrender.com/api', 
+        description: 'Production Server',
     },
   ],
   components: {

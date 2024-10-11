@@ -58,7 +58,18 @@ app.use(cors());
 // app.use(xss()); need to do middleware to it...
 // Routes
 app.get('/', (req, res) => {
-    res.send('TradeJolt API');
+    res.status(200).json({
+        message: "Welcome to the TradeJolt API!",
+        description: "This API provides endpoints for managing trades, user accounts, price alerts, and reports.",
+        documentation: "https://tradejolt.onrender.com/tradeJolt-api-docs",
+        version: "1.0.0",
+        status: "Running",
+        contact: {
+            name: "João Delgado",
+            email: "joaodelgado08@gmail.com",
+            message: "Feel free to reach out if you need further insights or assistance."
+    }
+      });
 });
 // app.get('/api', (req, res) => {
 //     // console.log(req.cookies)

@@ -15,7 +15,6 @@ const cors = require('cors');
 const xss = require ('xss');
 const rateLimit = require ('express-rate-limit');
 
-
 //routers
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -27,7 +26,7 @@ const priceAlertRouter = require('./routes/priceAlertRoutes');
 
 //DB
 const mongoDB = require('./db/connect');
-const { restoreActiveAlerts } = require('./utils/apcaWsClient');
+const { restoreActiveAlerts, stopWebSocket } = require('./utils/apcaWsClient'); // Added stopWebSocket
 
 //ALPACA API
 const { connectAlpaca } = require('./API/alpaca');
@@ -50,12 +49,12 @@ app.use(cookieParser(process.env.JWT_STRING))//acess the cookie
 // app.use(rateLimit({
 //     windowMs: 15 * 60 * 1000, // 15 minutes
 // 	limit: 100,// Limit each IP to 100 requests per `window` (here, per 15 minutes)
-
 //     })
 // );
 app.use(helmet());
 app.use(cors());
 // app.use(xss()); need to do middleware to it...
+
 // Routes
 app.get('/', (req, res) => {
     res.status(200).json({
@@ -68,14 +67,16 @@ app.get('/', (req, res) => {
             name: "João Delgado",
             email: "joaodelgado08@gmail.com",
             message: "Feel free to reach out if you need further insights or assistance."
-    }
+        }
       });
 });
-// app.get('/api', (req, res) => {
-//     // console.log(req.cookies)
-//     console.log(req.signedCookies);
-//     res.send('TradeJolt API');
-// });
+
+// dev route to kill websocket connections.
+app.get('/kill-ws', (req, res) => {
+    stopWebSocket(); // Call stopWebSocket to kill WebSocket connections
+    res.status(200).json({ message: "WebSocket connections killed" });
+});
+
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/accounts', accountRouter);
@@ -85,12 +86,10 @@ app.use('/api/comments', commentRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/priceAlert', priceAlertRouter);
 
+app.use(notFoundMiddleware); //once we "hit" here, we done, no next in this Middleware.
+app.use(errorHandlerMiddleware); //only hit from a "sucessfull" route.
 
-app.use(notFoundMiddleware)//once we "hit" here, we done, no next in this Middleware.
-app.use(errorHandlerMiddleware) //only hit from a "sucessfull" route.
-
-
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000;
 //db connection
 const start = async () => {
     try {

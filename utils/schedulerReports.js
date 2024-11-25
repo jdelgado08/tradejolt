@@ -10,8 +10,11 @@ const {
     createMonthlyReport,
 } = require('./createReport');
 
-//daily report  every 23:59 - Monday to Friday.
-cron.schedule('59 23 * * 1-5', async () => {
+
+//for test */1 * * * *
+
+//daily report  every 23:59 - Monday to Friday. 59 23 * * 1-5  
+cron.schedule('59 23 * * 1-5 ', async () => {
     try {
         console.log('Daily report cron job triggered');
         //previous day
@@ -33,13 +36,13 @@ cron.schedule('59 23 * * 1-5', async () => {
     }
 });
 
-//weekly report every saturday at 23:59
+//weekly report every saturday at 23:59 ---59 23 * * 6
 cron.schedule('59 23 * * 6', async () => {
     try {
         console.log('Weekly report cron job triggered');
         //previous week
-        const startDate = moment().subtract(1, 'week').startOf('week').toISOString();
-        const endDate = moment().subtract(1, 'week').endOf('week').toISOString();
+        const endDate = moment().day(6).subtract(1, 'week').endOf('day').toISOString();
+        const startDate = moment(endDate).subtract(6, 'days').startOf('day').toISOString();
 
         const accounts = await Account.find({});
         if (!accounts) {
@@ -55,13 +58,14 @@ cron.schedule('59 23 * * 6', async () => {
     }
 });
 
-//monthly report every 1st sunday of month
+//monthly report every 1st sunday of month ---59 23 1-7 * 0
 cron.schedule('59 23 1-7 * 0', async () => {
     try {
         console.log('Monthly report cron job triggered');
         //previous month
         const startDate = moment().subtract(1, 'month').startOf('month').toISOString();
         const endDate = moment().subtract(1, 'month').endOf('month').toISOString();
+        
 
         const accounts = await Account.find({});
         if (!accounts) {

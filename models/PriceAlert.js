@@ -34,6 +34,7 @@ const priceAlertSchema = new Schema({
   }
 }, { timestamps: true });
 
+
 const PriceAlert = mongoose.model('PriceAlert', priceAlertSchema);
 module.exports = PriceAlert;
 

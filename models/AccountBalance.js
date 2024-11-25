@@ -20,4 +20,3 @@ const accountBalanceSchema = new Schema({
 const AccountBalance = mongoose.model('AccountBalance', accountBalanceSchema);
 module.exports = AccountBalance;
 
-//make a trigger everyday at 23:59!!!!, so i have a regist....

@@ -30,7 +30,7 @@ const accountSchema = Schema ({
     },
     emailReport: {
       type: Boolean,
-      default: false,
+      default: true,
     },
 },{timestamps : true})
 

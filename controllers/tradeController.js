@@ -44,7 +44,7 @@ const createTrade = async (req, res) => {
   if (!user.isActive || !account.isActive) {
     throw new CustomError.NotFoundError(`User or account is inactive`)
   }
-  //console.log('PING PING 2');
+  //console.log('PING PONG');
 
 
   checkUserPermissions(req.user, account.userId)
@@ -240,7 +240,7 @@ const getAllTrades = async (req, res) => {
     const { userId, accountName, currentBalance } = trade.accountId;
     const { username } = userId;
 
-    // Initialize if not already initialized
+    //initialize if not already initialized
     if (!result[username]) {
       result[username] = {};
     }
@@ -251,7 +251,7 @@ const getAllTrades = async (req, res) => {
         trades: [],
       };
     } else {
-      // If trades array contains 'No trades taken', remove it
+      //if trades array contains 'No trades taken', remove it
       if (result[username][accountName].trades.includes('No trades taken')) {
         result[username][accountName].trades = [];
       }
@@ -283,7 +283,7 @@ const getAllTrades = async (req, res) => {
 const getAllTradeEntryManager = async (req, res) => {
 
   const managerId = req.user.userId;
-  console.log(managerId);
+  // console.log(managerId);
 
   // Find all users managed by the logged-in manager
   const managedUsers = await User.find({ managerId: managerId }).select('_id');
@@ -293,7 +293,7 @@ const getAllTradeEntryManager = async (req, res) => {
     throw new CustomError.NotFoundError('No users found');
   }
 
-  // Aggregation pipeline
+  //aggregation pipeline
    const pipeline = [
       { $match: { userId: { $in: managedUserIds } } },
       { $lookup: { from: 'trades', localField: '_id', foreignField: 'accountId', as: 'trades' } },
@@ -309,15 +309,12 @@ const getAllTradeEntryManager = async (req, res) => {
   
 }
 
-//upload am excell File and create trady entrys based on that
 const uploadTradesExcell = async (req, res) => {
-
   const { accountId } = req.params;
 
-  // file updated?
   if (!req.files || !req.files.file) {
     throw new CustomError.BadRequestError('File not found');
-  };
+  }
 
   const file = req.files.file;
   const workbook = new ExcelJS.Workbook();
@@ -327,28 +324,27 @@ const uploadTradesExcell = async (req, res) => {
   const jsonData = [];
 
   worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber === 1) return; //skip header
+    if (rowNumber === 1) return; // Skip header row
     const rowData = {
       accountId,
-      notes: row.getCell(1).value,
+      notes: row.getCell(1).value || '',
       symbol: row.getCell(2).value,
       entryTime: new Date(row.getCell(3).value),
       exitTime: new Date(row.getCell(4).value),
-      entryPrice: parseFloat(row.getCell(5).value),
-      exitPrice: parseFloat(row.getCell(6).value),
-      fees: parseFloat(row.getCell(7).value),
-      netProfitLoss: parseFloat(row.getCell(8).value),
-      size: parseInt(row.getCell(9).value, 10),
-      tradeType: row.getCell(10).value,
-      tradeDate: new Date(row.getCell(11).value),
-      platform: 'TopstepX', //add auto after, let as example
+      entryPrice: parseFloat(row.getCell(5).value) || 0,
+      exitPrice: parseFloat(row.getCell(6).value) || 0,
+      fees: parseFloat(row.getCell(7).value) || 0,
+      netProfitLoss: parseFloat(row.getCell(8).value) || 0,
+      size: parseInt(row.getCell(9).value, 10) || 0,
+      tradeType: row.getCell(10).value || 'Unknown',
+      tradeDate: new Date(row.getCell(11).value).toISOString().slice(0, 10), // Normalize to YYYY-MM-DD
+      platform: 'TopStepX', 
     };
     jsonData.push(rowData);
   });
 
   for (const row of jsonData) {
     const trade = new Trade(row);
-
 
     const account = await Account.findById(trade.accountId);
     if (!account) {
@@ -365,8 +361,6 @@ const uploadTradesExcell = async (req, res) => {
   }
 
   res.status(StatusCodes.CREATED).send('Trades imported successfully');
-  // res.status(StatusCodes.CREATED).json({ jsonData });
-
 };
 
 module.exports = {

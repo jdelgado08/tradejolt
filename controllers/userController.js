@@ -81,7 +81,7 @@ const getUser = async (req, res) => {
 }
 const showUser = async (req, res) => {
     //no need to query DB, have user in Cookie
-    console.log(req.user);
+    // console.log(req.user);
     
     res.status(StatusCodes.OK).json({ user: req.user })
 }
@@ -203,6 +203,4 @@ module.exports = {
     deactivateUser,
     activateUser,
     selfDeactivate,
-
-
 }

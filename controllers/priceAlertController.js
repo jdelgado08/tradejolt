@@ -13,7 +13,16 @@ const createPriceAlert = async (req, res) => {
         return res.status(400).json({ msg: 'All fields are required' });
     }
 
+    if (!req.user) {
+        return res.status(403).json({ msg: 'Not authorized to create this alert' });
+    }
+
     const userId = req.user.userId;
+
+    // Add validation before trying to create the alert
+    if (isNaN(priceLevel) || !['above', 'below'].includes(condition)) {
+        return res.status(400).json({ msg: 'Invalid priceLevel or condition' });
+    }
 
     try {
         const newAlert = await PriceAlert.create({
@@ -27,7 +36,7 @@ const createPriceAlert = async (req, res) => {
 
         console.log('Subscribing to stock price alerts after alert creation.');
 
-        // Sync WebSocket subscriptions after creating the alert
+        //sync WebSocket subscriptions after creating the alert
         await syncWebSocketSubscriptions();
 
         res.status(201).json(newAlert);

@@ -3,7 +3,6 @@ const { checkToken } = require('../utils')
 
 
 const authenticateUser = async (req, res, next) => {
-
     console.log("Authenticating user...");
 
     const token = req.signedCookies.token
@@ -19,11 +18,9 @@ const authenticateUser = async (req, res, next) => {
             userId : payload.userId,
             firstName : payload. firstName,
             lastName : payload. lastName,
-
         }
     } catch (error) {
-        throw new CustomError.UnauthenticatedError('Authentication Fail!')
-
+        throw new CustomError.UnauthenticatedError('Authentication Fail!');
     }
     next();
 }

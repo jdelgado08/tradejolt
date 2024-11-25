@@ -6,6 +6,8 @@ const {
     checkPermissions,
  } = require('../utils/checkPermissions');
 
+const { createDailyReport } = require('../utils/createReport');
+
 const getAllReports = async (req, res) => {
 
     const { reportType, startDate, endDate } = req.query;

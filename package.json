@@ -4,7 +4,8 @@
   "description": "Trading Jornal",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -46,9 +47,15 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.2",
     "nodemon": "^3.1.4"
   },
   "engines": {
     "node": ">=21.7.3"
+  },
+  "jest": {
+    "setupFilesAfterEnv": ["<rootDir>/tests/jest.setup.js "],
+    "testEnvironment": "node"
   }
 }

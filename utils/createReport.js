@@ -9,87 +9,76 @@ const generateReportHTML = require('./generateReportHTML');
 const sendReportEmail = require('./sendReportEmail');
 
 
-
 const createDailyReport = async (accountId, startDate, endDate, reportType = 'daily') => {
-
   const account = await Account.findById(accountId);
   if (!account) {
-    throw new CustomError.NotFoundError(`Account with id ${accountId} not found`); 
-  };
+      throw new CustomError.NotFoundError(`Account with id ${accountId} not found`);
+  }
 
   const user = await User.findById(account.userId);
   if (!user) {
-    throw new CustomError.NotFoundError(`User with id ${account.userId} not found`);
+      throw new CustomError.NotFoundError(`User with id ${account.userId} not found`);
   }
 
   const trades = await Trade.find({
-    accountId,
-    tradeDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      accountId,
+      tradeDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
   });
+
+  console.log(`Fetched trades for account ${accountId}:`, trades);
 
   const totalTrades = trades.length;
   const netPnL = trades.reduce((add, trade) => add + trade.netProfitLoss, 0);
   const totalContracts = trades.reduce((add, trade) => add + trade.size, 0);
   const totalFees = trades.reduce((sum, trade) => sum + trade.fees, 0);
 
+  const totalAccountBalance = await AccountBalance.findOne({ accountId }).sort({ date: -1 })?.balance || 0;
 
-  //calculate summary data
   const summaryData = {
-    netPnL,
-    totalContracts,
-    totalFees,
-    totalTrades,
-    avgWinningTrade: trades.filter(t => t.netProfitLoss > 0).length ? trades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / trades.filter(t => t.netProfitLoss > 0).length : 0,
-    avgLosingTrade: trades.filter(t => t.netProfitLoss <= 0).length ? trades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / trades.filter(t => t.netProfitLoss <= 0).length : 0,
-    winningTradePercent: totalTrades ? trades.filter(t => t.netProfitLoss > 0).length / totalTrades * 100 : 0,
-    totalAccountBalance: (await AccountBalance.findOne({ accountId }).sort({ date: -1 }))?.balance || 0,
+      netPnL,
+      totalContracts,
+      totalFees,
+      totalTrades,
+      avgWinningTrade: trades.filter(t => t.netProfitLoss > 0).length
+          ? trades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / trades.filter(t => t.netProfitLoss > 0).length
+          : 0,
+      avgLosingTrade: trades.filter(t => t.netProfitLoss <= 0).length
+          ? trades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / trades.filter(t => t.netProfitLoss <= 0).length
+          : 0,
+      winningTradePercent: totalTrades
+          ? (trades.filter(t => t.netProfitLoss > 0).length / totalTrades) * 100
+          : 0,
+      totalAccountBalance,
   };
 
+  console.log('Summary Data:', summaryData);
 
-  //throw error if can't find actual account balance
-
-   //test
-  // console.log(startDate + '-------------' + endDate);
-  // console.log(account.userId);
-  // console.log(totalTrades);
-  // console.log(netPnL);
-  // console.log(totalContracts);
-  // console.log(totalFees);
-  // console.log(winningTrades);
-  // console.log(losingTrades);
-  // console.log(avgWinningTrade);
-  // console.log(avgLosingTrade);
-  // console.log(winningTradePercent);
-  // console.log(actualAccountBalance.balance);
-
-  //create and save report
   const report = new Report({
-    userId: account.userId,
-    accountId,
-    period: reportType,
-    date: new Date(endDate),
-    data: summaryData,
-    trades: trades.map(trade => trade._id),
+      userId: account.userId,
+      accountId,
+      period: reportType,
+      date: new Date(endDate),
+      data: summaryData,
+      trades: trades.map(trade => trade._id),
   });
 
+  console.log('Trades included in the report:', trades.map(trade => trade._id));
   await report.save();
 
-  //generate HTML and send email if necessary
-
   const reportHTML = await generateReportHTML(account.accountName, reportType, summaryData, trades);
+
+  console.log('Trades passed to generateReportHTML:', trades);
+  console.log('Generated HTML Content:', reportHTML);
+
   if (account.emailReport) {
-    const subject = `${reportType} Trade Report for Account: ${account.accountName}`;
-    await sendReportEmail(user.email, subject, reportHTML);
+      const subject = `${reportType} Trade Report for Account: ${account.accountName}`;
+      await sendReportEmail(user.email, subject, reportHTML);
   }
 
-  //custom reports
   return report;
 };
 
-
-//weekly
 const createWeeklyReport = async (accountId, startDate, endDate) => {
-
   const account = await Account.findById(accountId);
   if (!account) {
     throw new Error(`Account with id ${accountId} does not exist`);
@@ -106,37 +95,69 @@ const createWeeklyReport = async (accountId, startDate, endDate) => {
     date: { $gte: new Date(startDate), $lte: new Date(endDate) },
   });
 
-  const totalTrades = dailyReports.reduce((add, report) => add + report.data.totalTrades, 0);
-  const netPnL = dailyReports.reduce((add, report) => add + report.data.netPnL, 0);
-  const totalContracts = dailyReports.reduce((add, report) => add + report.data.totalContracts, 0);
-  const totalFees = dailyReports.reduce((add, report) => add + report.data.totalFees, 0);
+  const uniqueDailyReports = dailyReports.filter((report, index, self) =>
+    index === self.findIndex((r) => r._id.toString() === report._id.toString())
+  );
 
-  // Calculate summary data
+  if (uniqueDailyReports.length === 0) {
+    console.log(`No daily reports found for account ${accountId} between ${startDate} and ${endDate}`);
+
+    const summaryData = {
+      netPnL: 0,
+      totalContracts: 0,
+      totalFees: 0,
+      totalTrades: 0,
+      avgWinningTrade: 0,
+      avgLosingTrade: 0,
+      winningTradePercent: 0,
+      totalAccountBalance: (await AccountBalance.findOne({ accountId }).sort({ date: -1 }))?.balance || 0,
+    };
+
+    const reportHTML = await generateReportHTML(account.accountName, 'weekly', summaryData, [], []);
+    if (account.emailReport) {
+      await sendReportEmail(
+        user.email,
+        `Weekly Trade Report for Account: ${account.accountName}`,
+        reportHTML
+      );
+    }
+    return { message: "No daily reports found. Empty weekly report sent." };
+  }
+
+  const totalTrades = uniqueDailyReports.reduce((add, report) => add + report.data.totalTrades, 0);
+  const netPnL = uniqueDailyReports.reduce((add, report) => add + report.data.netPnL, 0);
+  const totalContracts = uniqueDailyReports.reduce((add, report) => add + report.data.totalContracts, 0);
+  const totalFees = uniqueDailyReports.reduce((add, report) => add + report.data.totalFees, 0);
+
   const summaryData = {
     netPnL,
     totalContracts,
     totalFees,
     totalTrades,
-    avgWinningTrade: dailyReports.length ? dailyReports.reduce((add, report) => add + report.data.avgWinningTrade, 0) / dailyReports.length : 0,
-    avgLosingTrade: dailyReports.length ? dailyReports.reduce((add, report) => add + report.data.avgLosingTrade, 0) / dailyReports.length : 0,
-    winningTradePercent: totalTrades ? dailyReports.reduce((add, report) => add + report.data.winningTradePercent, 0) / dailyReports.length : 0,
+    avgWinningTrade: uniqueDailyReports.length
+      ? uniqueDailyReports.reduce((add, report) => add + report.data.avgWinningTrade, 0) / uniqueDailyReports.length
+      : 0,
+    avgLosingTrade: uniqueDailyReports.length
+      ? uniqueDailyReports.reduce((add, report) => add + report.data.avgLosingTrade, 0) / uniqueDailyReports.length
+      : 0,
+    winningTradePercent: totalTrades
+      ? uniqueDailyReports.reduce((add, report) => add + report.data.winningTradePercent, 0) / uniqueDailyReports.length
+      : 0,
     totalAccountBalance: (await AccountBalance.findOne({ accountId }).sort({ date: -1 }))?.balance || 0,
   };
 
-  //create and save weekly report
   const report = new Report({
     userId: account.userId,
     accountId,
     period: 'weekly',
     date: new Date(endDate),
     data: summaryData,
-    dailyReports: dailyReports.map(report => report._id)
+    dailyReports: uniqueDailyReports.map((report) => report._id),
   });
 
   await report.save();
 
-  //generate weekly report HTML and send email
-  const reportHTML = await generateReportHTML(account.accountName, 'weekly', summaryData, [], dailyReports);
+  const reportHTML = await generateReportHTML(account.accountName, 'weekly', summaryData, [], uniqueDailyReports);
   if (account.emailReport) {
     await sendReportEmail(user.email, `Weekly Trade Report for Account: ${account.accountName}`, reportHTML);
   }
@@ -144,12 +165,7 @@ const createWeeklyReport = async (accountId, startDate, endDate) => {
   return report;
 };
 
-
-
-// ----------------- Monthly
-
 const createMonthlyReport = async (accountId, startDate, endDate) => {
-
   const account = await Account.findById(accountId);
   if (!account) {
     throw new Error(`Account with id ${accountId} does not exist`);
@@ -166,11 +182,41 @@ const createMonthlyReport = async (accountId, startDate, endDate) => {
     date: { $gte: new Date(startDate), $lte: new Date(endDate) },
   });
 
+  // Deduplicate weekly reports
+  const uniqueWeeklyReports = weeklyReports.filter((report, index, self) =>
+    index === self.findIndex((r) => r._id.toString() === report._id.toString())
+  );
+
+  if (uniqueWeeklyReports.length === 0) {
+    console.log(`No weekly reports found for account ${accountId} between ${startDate} and ${endDate}`);
+
+    const summaryData = {
+      netPnL: 0,
+      totalContracts: 0,
+      totalFees: 0,
+      totalTrades: 0,
+      avgWinningTrade: 0,
+      avgLosingTrade: 0,
+      winningTradePercent: 0,
+      totalAccountBalance: (await AccountBalance.findOne({ accountId }).sort({ date: -1 }))?.balance || 0,
+    };
+
+    const reportHTML = await generateReportHTML(account.accountName, 'monthly', summaryData, [], [], []);
+    if (account.emailReport) {
+      await sendReportEmail(
+        user.email,
+        `Monthly Trade Report for Account: ${account.accountName}`,
+        reportHTML
+      );
+    }
+    return { message: "No weekly reports found. Empty monthly report sent." };
+  }
+
   // Aggregate data for monthly summary
-  const totalTrades = weeklyReports.reduce((add, report) => add + report.data.totalTrades, 0);
-  const netPnL = weeklyReports.reduce((add, report) => add + report.data.netPnL, 0);
-  const totalContracts = weeklyReports.reduce((add, report) => add + report.data.totalContracts, 0);
-  const totalFees = weeklyReports.reduce((add, report) => add + report.data.totalFees, 0);
+  const totalTrades = uniqueWeeklyReports.reduce((add, report) => add + report.data.totalTrades, 0);
+  const netPnL = uniqueWeeklyReports.reduce((add, report) => add + report.data.netPnL, 0);
+  const totalContracts = uniqueWeeklyReports.reduce((add, report) => add + report.data.totalContracts, 0);
+  const totalFees = uniqueWeeklyReports.reduce((add, report) => add + report.data.totalFees, 0);
 
   // Calculate summary data
   const summaryData = {
@@ -178,9 +224,15 @@ const createMonthlyReport = async (accountId, startDate, endDate) => {
     totalContracts,
     totalFees,
     totalTrades,
-    avgWinningTrade: weeklyReports.length ? weeklyReports.reduce((add, report) => add + report.data.avgWinningTrade, 0) / weeklyReports.length : 0,
-    avgLosingTrade: weeklyReports.length ? weeklyReports.reduce((add, report) => add + report.data.avgLosingTrade, 0) / weeklyReports.length : 0,
-    winningTradePercent: totalTrades ? weeklyReports.reduce((add, report) => add + report.data.winningTradePercent, 0) / weeklyReports.length : 0,
+    avgWinningTrade: uniqueWeeklyReports.length
+      ? uniqueWeeklyReports.reduce((add, report) => add + report.data.avgWinningTrade, 0) / uniqueWeeklyReports.length
+      : 0,
+    avgLosingTrade: uniqueWeeklyReports.length
+      ? uniqueWeeklyReports.reduce((add, report) => add + report.data.avgLosingTrade, 0) / uniqueWeeklyReports.length
+      : 0,
+    winningTradePercent: totalTrades
+      ? uniqueWeeklyReports.reduce((add, report) => add + report.data.winningTradePercent, 0) / uniqueWeeklyReports.length
+      : 0,
     totalAccountBalance: (await AccountBalance.findOne({ accountId }).sort({ date: -1 }))?.balance || 0,
   };
 
@@ -191,20 +243,19 @@ const createMonthlyReport = async (accountId, startDate, endDate) => {
     period: 'monthly',
     date: new Date(endDate),
     data: summaryData,
-    weeklyReports: weeklyReports.map(report => report._id)
+    weeklyReports: uniqueWeeklyReports.map((report) => report._id),
   });
 
   await report.save();
 
   // Generate monthly report HTML and send email
-  const reportHTML = await generateReportHTML(account.accountName, 'monthly', summaryData, [], [], weeklyReports);
+  const reportHTML = await generateReportHTML(account.accountName, 'monthly', summaryData, [], [], uniqueWeeklyReports);
   if (account.emailReport) {
     await sendReportEmail(user.email, `Monthly Trade Report for Account: ${account.accountName}`, reportHTML);
   }
 
   return report;
 };
-
 
 
 module.exports = {

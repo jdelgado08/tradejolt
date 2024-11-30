@@ -12,54 +12,65 @@ const sendReportEmail = require('./sendReportEmail');
 const createDailyReport = async (accountId, startDate, endDate, reportType = 'daily') => {
   const account = await Account.findById(accountId);
   if (!account) {
-      throw new CustomError.NotFoundError(`Account with id ${accountId} not found`);
+    throw new CustomError.NotFoundError(`Account with id ${accountId} not found`);
   }
 
   const user = await User.findById(account.userId);
   if (!user) {
-      throw new CustomError.NotFoundError(`User with id ${account.userId} not found`);
+    throw new CustomError.NotFoundError(`User with id ${account.userId} not found`);
   }
 
   const trades = await Trade.find({
-      accountId,
-      tradeDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
+    accountId,
+    tradeDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
   });
 
   console.log(`Fetched trades for account ${accountId}:`, trades);
 
+  
   const totalTrades = trades.length;
   const netPnL = trades.reduce((add, trade) => add + trade.netProfitLoss, 0);
   const totalContracts = trades.reduce((add, trade) => add + trade.size, 0);
   const totalFees = trades.reduce((sum, trade) => sum + trade.fees, 0);
 
-  const totalAccountBalance = await AccountBalance.findOne({ accountId }).sort({ date: -1 })?.balance || 0;
+  const latestAccountBalance = await AccountBalance.findOne({ accountId }).sort({ date: -1 });
+  const totalAccountBalance = latestAccountBalance ? latestAccountBalance.balance : 0;
+
+  const winningTrades = trades.filter(t => t.netProfitLoss > 0);
+  const losingTrades = trades.filter(t => t.netProfitLoss <= 0);
+
+  const avgWinningTrade = winningTrades.length > 0
+    ? winningTrades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / winningTrades.length
+    : 0;
+
+  const avgLosingTrade = losingTrades.length > 0
+    ? losingTrades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / losingTrades.length
+    : 0;
+
+  const winningTradePercent = totalTrades > 0
+    ? (winningTrades.length / totalTrades) * 100
+    : 0;
 
   const summaryData = {
-      netPnL,
-      totalContracts,
-      totalFees,
-      totalTrades,
-      avgWinningTrade: trades.filter(t => t.netProfitLoss > 0).length
-          ? trades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / trades.filter(t => t.netProfitLoss > 0).length
-          : 0,
-      avgLosingTrade: trades.filter(t => t.netProfitLoss <= 0).length
-          ? trades.reduce((sum, trade) => sum + trade.netProfitLoss, 0) / trades.filter(t => t.netProfitLoss <= 0).length
-          : 0,
-      winningTradePercent: totalTrades
-          ? (trades.filter(t => t.netProfitLoss > 0).length / totalTrades) * 100
-          : 0,
-      totalAccountBalance,
+    netPnL: parseFloat(netPnL.toFixed(2)), 
+    totalContracts,
+    totalFees: parseFloat(totalFees.toFixed(2)),
+    totalTrades,
+    avgWinningTrade: parseFloat(avgWinningTrade.toFixed(2)),
+    avgLosingTrade: parseFloat(avgLosingTrade.toFixed(2)),
+    winningTradePercent: parseFloat(winningTradePercent.toFixed(2)),
+    totalAccountBalance: parseFloat(totalAccountBalance.toFixed(2)),
   };
 
   console.log('Summary Data:', summaryData);
 
   const report = new Report({
-      userId: account.userId,
-      accountId,
-      period: reportType,
-      date: new Date(endDate),
-      data: summaryData,
-      trades: trades.map(trade => trade._id),
+    userId: account.userId,
+    accountId,
+    period: reportType,
+    date: new Date(endDate),
+    data: summaryData,
+    trades: trades.map(trade => trade._id),
   });
 
   console.log('Trades included in the report:', trades.map(trade => trade._id));
@@ -71,8 +82,8 @@ const createDailyReport = async (accountId, startDate, endDate, reportType = 'da
   console.log('Generated HTML Content:', reportHTML);
 
   if (account.emailReport) {
-      const subject = `${reportType} Trade Report for Account: ${account.accountName}`;
-      await sendReportEmail(user.email, subject, reportHTML);
+    const subject = `${reportType} Trade Report for Account: ${account.accountName}`;
+    await sendReportEmail(user.email, subject, reportHTML);
   }
 
   return report;
